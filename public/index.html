@@ -125,18 +125,21 @@
 <!-- Neumorphism JS -->
 <script src="./assets/js/neumorphism.js"></script>
 <script>
-var url = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
-var urlparam = url[0].split('=');
-if (urlparam[1] == "opencart2"){
-    $('.opencart_2').show();
-}else{
-    $('.opencart_3').show();
-}
+    $(window).on('load', function(){
+        var url = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+        var urlparam = url[0].split('=');
+        if (urlparam[1] == "opencart2"){
+            $('.opencart_2').show();
+        }else{
+            $('.opencart_3').show();
+        }
 
-function changezip(obj) {
-    $('.zip').hide();
-    $('.'+obj.value).show();
-}
+        function changezip(obj) {
+            $('.zip').hide();
+            $('.'+obj.value).show();
+        }
+    });
+
 
 </script>
 </body>
