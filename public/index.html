@@ -93,7 +93,7 @@
                         <div class="opencart2 plugin" style="display:none">
                             <p class="lead px-md-6">Plugin Version</p>
                             <div class="d-flex flex-column flex-wrap flex-md-row justify-content-md-center mb-5">
-                                <select id="changeZip" class="btn btn-primary mb-3 mb-lg-0 mr-3" onchange="changezip(this)" >
+                                <select id="changeZip" class="btn btn-primary mb-3 mb-lg-0 mr-3" >
                                     <option value = "version_v1"> v1.0.0 </option>
                                     
                                 </select>
@@ -125,16 +125,15 @@
 <!-- Neumorphism JS -->
 <script src="./assets/js/neumorphism.js"></script>
 <script>
-    $(window).on('load', function(){
-        function changeplugin(obj){
-            $('.'+obj.value).show();
-        }
+    function changeplugin(obj){
+        $('.plugin').hide()
+        $('.'+obj.value).show();
+    }
 
-        function changezip(obj) {
-            $('.zip').hide();
-            $('.'+obj.value).show();
-        }
-    });
+    function changezip(obj) {
+        $('.zip').hide();
+        $('.'+obj.value).show();
+    }
 
 
 </script>
