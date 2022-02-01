@@ -57,55 +57,57 @@
         </div>
     </nav>
 </header>
-    <main class="opencart_3" style="display:none">
+    <main>
 
         <!-- Hero -->
         <section class="section section bg-soft pb-5 overflow-hidden z-2" >
             <div class="container z-2">
                 <div class="row justify-content-center text-center pt-6">
                     <div class="col-lg-8 col-xl-8">
-                        <h1 class="display-2 mb-3">Nimbbl Opencart3</h1>
+                        <h1 class="display-2 mb-3">Nimbbl Opencart</h1>
                         <p class="lead px-md-6 mb-5">Download and install <strong>Nimbbl Checkout</strong> plugin.</p>
+                        <p class="lead px-md-6">Opencart Version</p>
                         <div class="d-flex flex-column flex-wrap flex-md-row justify-content-md-center mb-5">
-                            <select id="changeZip" class="btn btn-primary mb-3 mb-lg-0 mr-3" onchange="changezip(this)" >
-                                <option value = "version_v2"> v2.0.0 </option>
-                                <option value = "version_v1"> v1.0.0 </option>
+                            <select id="changeplugin" class="btn btn-primary mb-3 mb-lg-0 mr-3" onchange="changeplugin(this)" >
+                                <option value = "opencart3"> v3.0 </option>
+                                <option value = "opencart2"> v2.3 </option>
                                 
                             </select>
                         </div>
-                        <div class="flex-column flex-wrap flex-md-row justify-content-md-center mb-5 zip version_v1">
-                            <a href="./opencart3/v1.0.0/Opencart3_Nimbbl.zip" target="_blank" class="btn btn-primary mb-3 mb-lg-0 mr-3"><i class="fa fa-cloud-download-alt"></i> Download source code (v1.0.0 zip)</a>
+                        <div class="opencart3 plugin">
+                            <p class="lead px-md-6">Plugin Version</p>
+                            <div class="d-flex flex-column flex-wrap flex-md-row justify-content-md-center mb-5">
+                                <select id="changeZip" class="btn btn-primary mb-3 mb-lg-0 mr-3" onchange="changezip(this)" >
+                                    <option value = "version_v2"> v2.0.0 </option>
+                                    <option value = "version_v1"> v1.0.0 </option>
+                                    
+                                </select>
+                            </div>
+                            <div class="flex-column flex-wrap flex-md-row justify-content-md-center mb-5 zip version_v1" style="display:none">
+                                <a href="./opencart3/v1.0.0/Opencart3_Nimbbl.zip" target="_blank" class="btn btn-primary mb-3 mb-lg-0 mr-3"><i class="fa fa-cloud-download-alt"></i> Download source code (v1.0.0 zip)</a>
+                            </div>
+                            <div class="flex-column flex-wrap flex-md-row justify-content-md-center mb-5 zip version_v2" >
+                                <a href="./opencart3/v2.0.0/Opencart3_Nimbbl.zip" target="_blank" class="btn btn-primary mb-3 mb-lg-0 mr-3"><i class="fa fa-cloud-download-alt"></i> Download source code (v2.0.0 zip)</a>
+                            </div>
                         </div>
-                        <div class="flex-column flex-wrap flex-md-row justify-content-md-center mb-5 zip version_v2" style="display:none">
-                            <a href="./opencart3/v2.0.0/Opencart3_Nimbbl.zip" target="_blank" class="btn btn-primary mb-3 mb-lg-0 mr-3"><i class="fa fa-cloud-download-alt"></i> Download source code (v2.0.0 zip)</a>
+                        <div class="opencart2 plugin" style="display:none">
+                            <p class="lead px-md-6">Plugin Version</p>
+                            <div class="d-flex flex-column flex-wrap flex-md-row justify-content-md-center mb-5">
+                                <select id="changeZip" class="btn btn-primary mb-3 mb-lg-0 mr-3" onchange="changezip(this)" >
+                                    <option value = "version_v1"> v1.0.0 </option>
+                                    
+                                </select>
+                            </div>
+                            <div class="flex-column flex-wrap flex-md-row justify-content-md-center mb-5 zip version_v1">
+                                <a href="./opencart2/v1.0.0/Opencart3_Nimbbl.zip" target="_blank" class="btn btn-primary mb-3 mb-lg-0 mr-3"><i class="fa fa-cloud-download-alt"></i> Download source code (v1.0.0 zip)</a>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
     </main>
-    <main class="opencart_2" style="display:none">
-        <section class="section section bg-soft pb-5 overflow-hidden z-2">
-            <div class="container z-2">
-                <div class="row justify-content-center text-center pt-6">
-                    <div class="col-lg-8 col-xl-8">
-                        <h1 class="display-2 mb-3">Nimbbl Opencart2</h1>
-                        <p class="lead px-md-6 mb-5">Download and install <strong>Nimbbl Checkout</strong> plugin.</p>
-                        <div class="d-flex flex-column flex-wrap flex-md-row justify-content-md-center mb-5">
-                            <select id="changeZip" class="btn btn-primary mb-3 mb-lg-0 mr-3" onchange="changezip(this)" >
-                                <option value = "version_v1"> v1.0.0 </option>
-                                
-                            </select>
-                        </div>
-                        <div class="flex-column flex-wrap flex-md-row justify-content-md-center mb-5 zip version_v1">
-                            <a href="./opencart2/v1.0.0/Opencart3_Nimbbl.zip" target="_blank" class="btn btn-primary mb-3 mb-lg-0 mr-3"><i class="fa fa-cloud-download-alt"></i> Download source code (v1.0.0 zip)</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-    </main>
+    
     <hr>
     <footer class="d-flex pt-4">
     <div class="container">
@@ -124,12 +126,8 @@
 <script src="./assets/js/neumorphism.js"></script>
 <script>
     $(window).on('load', function(){
-        var url = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
-        var urlparam = url[0].split('=');
-        if (urlparam[1] == "opencart2"){
-            $('.opencart_2').show();
-        }else{
-            $('.opencart_3').show();
+        function changeplugin(obj){
+            $('.'+obj.value).show();
         }
 
         function changezip(obj) {
