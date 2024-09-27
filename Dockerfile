@@ -1,32 +1,30 @@
-# Stage 1: Build Stage
-FROM node:14-alpine AS build
+# Use the official PHP-FPM image as the base
+FROM php:8.2-fpm
 
-# Set working directory inside the container
-WORKDIR /app
+# Install necessary dependencies for PHP and Nginx
+RUN apt-get update && apt-get install -y \
+    nginx \
+    zip \
+    unzip \
+    && docker-php-ext-install mysqli
 
-# Copy application code inside image
-COPY . .
+# Set working directory to /var/www/html
+WORKDIR /var/www/html/app
 
-# Install dependencies
-RUN npm install
+# Copy application files to the container
+COPY public /var/www/html/app
 
-# Build the React application
-RUN npm run build
+# Set correct permissions
+RUN chown -R www-data:www-data /var/www/html/app && chmod -R 755 /var/www/html/app
 
-# Stage 2: Production Stage
-FROM nginx:alpine
+# Remove the default Nginx page (this prevents Nginx from serving the default page)
+RUN rm /etc/nginx/sites-enabled/default
 
-# Remove the default Nginx configuration
-RUN rm -rf /usr/share/nginx/html/*
+# Copy Nginx configuration file
+COPY default.conf /etc/nginx/conf.d/default.conf
 
-# Copy custom Nginx configuration file
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Copy the build output from the previous stage to the Nginx html directory
-COPY --from=build /app/build /usr/share/nginx/html
-
-# Expose port 80
+# Expose port 80 for the web server
 EXPOSE 80
 
-# Start Nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Start PHP-FPM and Nginx services
+CMD ["sh", "-c", "php-fpm & nginx -g 'daemon off;'"]
