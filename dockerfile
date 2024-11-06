@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /var/www/html/app
 
 # Copy application files to the container
-COPY public /var/www/html/app
+COPY . /var/www/html/app
 
 # Set correct permissions
 RUN chown -R www-data:www-data /var/www/html/app && chmod -R 755 /var/www/html/app
