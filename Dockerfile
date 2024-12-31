@@ -1,5 +1,5 @@
 # Use the official PHP-FPM image as the base
-FROM php:8.2-fpm
+FROM 517208865016.dkr.ecr.ap-south-1.amazonaws.com/base:php-8.2-fpm
 
 # Install necessary dependencies for PHP and Nginx
 RUN apt-get update && apt-get install -y \
