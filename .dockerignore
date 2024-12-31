@@ -1,0 +1,30 @@
+# Ignore log files
+*.log
+
+# Ignore temporary files
+*.tmp
+*.swp
+*.bak
+*.old
+
+# Ignore compiled Python files
+*.pyc
+*.pyo
+__pycache__/
+
+# Ignore build artifacts
+dist/
+build/
+*.tar.gz
+
+# Ignore Docker-related files
+docker-compose.override.yml
+
+# Ignore IDE and editor configurations
+.vscode/
+.idea/
+*.iml
+
+# Ignore Git files
+.git/
+.gitignore
