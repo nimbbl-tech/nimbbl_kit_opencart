@@ -1,0 +1,211 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+  <div class="container-fluid">
+  <div class="pull-right">
+         <button type="submit" form="form-payment" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a></div>
+      <h1>{{ heading_title }}</h1>
+ 
+  <ul class="breadcrumb">
+    {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+  </ul>
+  </div>
+  </div>
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+  <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-pencil"></i>{{ text_edit }}</h3>
+  </div>
+  <form action="{{ action }}" method="post" enctype="multipart/form-data" name="form-nimbbl" id="form-nimbbl" class="form-horizontal">
+ <div class="box">
+  <!--// Nimbbl Start //-->
+  <div class="heading">
+       <h1><img src="view/image/payment/nimbbllogo.png" alt="nimbbl" /></h1>
+   </div>
+ <div class="content">
+  <div class="panel-body">
+        <div class="col-sm-10"> 
+			<div class="form-group required">
+				<label class="col-sm-20 control-label" for="payment_nimbbl_webhook">Webhook URL: {{ webhook_url }}</label>
+			</div>
+			<div class="form-group required">
+            <label class="col-sm-2 control-label" for="payment_nimbbl_title"><span data-toggle="tooltip" title="{{ help_title }}">{{ entry_title }}</span></label>
+            <div class="col-sm-10">
+              <input type="text" name="payment_nimbbl_title" value="{{ payment_nimbbl_title }}" placeholder="{{ entry_title }}" id="payment_nimbbl_title" class="form-control" />
+              {% if error_title %} 
+              <div class="text-danger">{{ error_title }}</div>
+              {% endif %}
+            </div>
+			</div>
+			
+			<div class="form-group required">
+				<label class="col-sm-2 control-label" for="payment_nimbbl_mode">{{ entry_mode }}</label>
+				<div class="col-sm-10">
+					<select name="payment_nimbbl_mode" id="payment_nimbbl_mode" class="form-control">
+						{% if payment_nimbbl_mode == 'live' %}
+						<option value="live" selected="selected">{{ text_live }}</option>
+						{% else %}
+						<option value="live">{{ text_live }}</option>
+						{% endif %}
+						{% if payment_nimbbl_mode == 'test' %}
+						<option value="test" selected="selected">{{ text_test }}</option>
+						{% else %}
+						<option value="test">{{ text_test }}</option>
+						{% endif %}                
+					</select>
+				</div>
+          </div>
+		  <div class="form-group required">
+            <label class="col-sm-2 control-label" for="payment_nimbbl_testendpoint"><span data-toggle="tooltip" title="{{ help_testendpoint }}">{{ entry_testendpoint }}</span></label>
+            <div class="col-sm-10">
+              <input type="text" name="payment_nimbbl_testendpoint" value="{{ payment_nimbbl_testendpoint }}" placeholder="{{ entry_testendpoint }}" id="payment_nimbbl_testendpoint" class="form-control" />
+              {% if error_testendpoint %} 
+              <div class="text-danger">{{ error_testendpoint }}</div>
+              {% endif %}
+            </div>
+          </div>
+          <div class="form-group required">
+            <label class="col-sm-2 control-label" for="payment_nimbbl_testpublickey"><span data-toggle="tooltip" title="{{ help_testpublickey }}">{{ entry_testpublickey }}</span></label>
+            <div class="col-sm-10">
+              <input type="text" name="payment_nimbbl_testpublickey" value="{{ payment_nimbbl_testpublickey }}" placeholder="{{ entry_testpublickey }}" id="payment_nimbbl_testpublickey" class="form-control" />
+              {% if error_testpublickey %} 
+              <div class="text-danger">{{ error_testpublickey }}</div>
+              {% endif %}
+            </div>
+          </div>
+          <div class="form-group required">
+            <label class="col-sm-2 control-label" for="payment_nimbbl_testprivatekey"><span data-toggle="tooltip" title="{{ help_testprivatekey }}">{{ entry_testprivatekey }}</span></label>
+            <div class="col-sm-10">
+              <input type="text" name="payment_nimbbl_testprivatekey" value="{{ payment_nimbbl_testprivatekey }}" placeholder="{{ entry_testprivatekey }}" id="payment_nimbbl_testprivatekey" class="form-control" />
+              {% if error_testprivatekey is not empty %}
+              <div class="text-danger">{{ error_testprivatekey }}</div>
+              {% endif %}
+            </div>
+          </div>
+		  <div class="form-group required">
+            <label class="col-sm-2 control-label" for="payment_nimbbl_liveendpoint"><span data-toggle="tooltip" title="{{ help_liveendpoint }}">{{ entry_liveendpoint }}</span></label>
+            <div class="col-sm-10">
+              <input type="text" name="payment_nimbbl_liveendpoint" value="{{ payment_nimbbl_liveendpoint }}" placeholder="{{ entry_liveendpoint }}" id="payment_nimbbl_liveendpoint" class="form-control" />
+              {% if error_liveendpoint %} 
+              <div class="text-danger">{{ error_liveendpoint }}</div>
+              {% endif %}
+            </div>
+          </div>
+          <div class="form-group required">
+            <label class="col-sm-2 control-label" for="payment_nimbbl_livepublickey"><span data-toggle="tooltip" title="{{ help_livepublickey }}">{{ entry_livepublickey }}</span></label>
+            <div class="col-sm-10">
+              <input type="text" name="payment_nimbbl_livepublickey" value="{{ payment_nimbbl_livepublickey }}" placeholder="{{ entry_livepublickey }}" id="payment_nimbbl_livepublickey" class="form-control" />
+              {% if error_livepublickey %} 
+              <div class="text-danger">{{ error_livepublickey }}</div>
+              {% endif %}
+            </div>
+          </div>
+          <div class="form-group required">
+            <label class="col-sm-2 control-label" for="payment_nimbbl_liveprivatekey"><span data-toggle="tooltip" title="{{ help_liveprivatekey }}">{{ entry_liveprivatekey }}</span></label>
+            <div class="col-sm-10">
+              <input type="text" name="payment_nimbbl_liveprivatekey" value="{{ payment_nimbbl_liveprivatekey }}" placeholder="{{ entry_liveprivatekey }}" id="payment_nimbbl_liveprivatekey" class="form-control" />
+              {% if error_liveprivatekey is not empty %}
+              <div class="text-danger">{{ error_liveprivatekey }}</div>
+              {% endif %}
+            </div>
+          </div>
+		  <div class="form-group">
+            <label class="col-sm-2 control-label" for="payment_nimbbl_geo_zone_id"><span data-toggle="tooltip" title="{{ help_geozone }}">{{ entry_geo_zone }}</span></label>
+            <div class="col-sm-10">
+              <select name="payment_nimbbl_geo_zone_id" id="payment_nimbbl_geo_zone_id" class="form-control">
+                <option value="0">{{ text_all_zones }}</option>
+                {% for geo_zone in geo_zones %}
+                {% if geo_zone.geo_zone_id == payment_nimbbl_geo_zone_id %}
+                <option value="{{ geo_zone['geo_zone_id'] }}" selected="selected">{{ geo_zone['name'] }}</option>
+                {% else %}
+                <option value="{{ geo_zone['geo_zone_id'] }}">{{ geo_zone['name'] }}</option>
+                {% endif %}
+                {% endfor %}
+              </select>
+            </div>
+          </div>          
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="payment_nimbbl_total"><span data-toggle="tooltip" title="{{ help_total }}">{{ entry_total }}</span></label>
+            <div class="col-sm-10">
+              <input type="text" name="payment_nimbbl_total" value="{{ payment_nimbbl_total }}" placeholder="{{ entry_total }}" id="payment_nimbbl_total" class="form-control" />
+            </div>
+          </div>
+          
+          <!--order_status-->
+          
+          <div class="form-group">
+             <label class="col-sm-2 control-label" for="payment_nimbbl_order_status_id"><span data-toggle="tooltip" title="{{ help_orderstatus }}">{{ entry_order_status }}</span></label>
+               <div class="col-sm-10">
+                 <select name="payment_nimbbl_order_status_id" id="payment_nimbbl_order_status_id" class="form-control">
+                    {% for order_status in order_statuses %}
+                    {% if order_status.order_status_id == payment_nimbbl_order_status_id %}
+                      <option value="{{ order_status['order_status_id'] }}" selected="selected">{{ order_status['name'] }}</option>
+					{% else %}
+                      <option value="{{ order_status['order_status_id'] }}">{{ order_status['name'] }}</option>
+                    {% endif %}
+                    {% endfor %}
+                 </select>
+               </div> 
+          </div>
+          
+          <!--order_status-->          
+          
+          <!--order_fail_status-->
+          
+          <div class="form-group">
+             <label class="col-sm-2 control-label" for="payment_nimbbl_order_fail_status_id"><span data-toggle="tooltip" title="{{ help_orderfailstatus }}">{{ entry_order_fail_status }}</span></label>
+               <div class="col-sm-10">
+                 <select name="payment_nimbbl_order_fail_status_id" id="payment_nimbbl_order_fail_status_id" class="form-control">
+                    {% for order_status in order_statuses %}
+                    {% if order_status.order_status_id == payment_nimbbl_order_fail_status_id %}
+                      <option value="{{ order_status['order_status_id'] }}" selected="selected">{{ order_status['name'] }}</option>
+                    {% else %}
+                      <option value="{{ order_status['order_status_id'] }}">{{ order_status['name'] }}</option>
+                    {% endif %}
+                    {% endfor %}
+                 </select>
+               </div> 
+          </div>
+          
+          <!--order_fail_status-->    
+          
+          <div class="form-group">
+              <label class="col-sm-2 control-label" for="payment_nimbbl_status"><span data-toggle="tooltip" title="{{ help_pluginstatus }}">{{ entry_status }}</span></label>
+                 <div class="col-sm-10">
+                   <select name="payment_nimbbl_status" id="payment_nimbbl_status" class="form-control">
+                      {% if payment_nimbbl_status == true %}
+                         <option value="1" selected="selected">{{ text_enabled }}</option>
+                         <option value="0">{{ text_disabled }}</option>
+                      {% else %}
+                         <option value="1">{{ text_enabled }}</option>
+                         <option value="0" selected="selected">{{ text_disabled }}</option>
+                      {% endif %}
+                   </select>
+                   {% if error_status %}
+                	<div class="text-danger">{{ error_status }}</div>
+            	 	{% endif %}
+                 </div>                  
+          </div>
+          
+          <div class="form-group">
+               <label class="col-sm-2 control-label" for="payment_nimbbl_sort_order"><span data-toggle="tooltip" title="{{ help_sortorder }}">{{ entry_sort_order }}</span></label>
+               	 <div class="col-sm-10">
+                      <input type="text" name="payment_nimbbl_sort_order" value="{{ payment_nimbbl_sort_order }}"  id="payment_nimbbl_sort_order" class="form-control"size="1" />
+                 </div>
+          </div> 
+
+      </div>
+     </div>
+     </div>
+    <!--// Nimbbl End //-->
+<hr />
+</form>
+{{ footer }}
