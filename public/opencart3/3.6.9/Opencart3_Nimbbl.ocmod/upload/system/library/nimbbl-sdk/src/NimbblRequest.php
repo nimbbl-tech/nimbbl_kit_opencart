@@ -14,28 +14,6 @@ if (defined('CURL_SSLVERSION_TLSv1_1') === false) {
     define('CURL_SSLVERSION_TLSv1_1', 5);
 }
 
-
-// class NimbblAuth implements Requests_Auth
-// {
-//     protected $token;
-//     protected $accessSecret;
-
-//     public function __construct($token)
-//     {
-//         $this->token = $token;
-//     }
-
-//     public function register(Requests_Hooks $hooks)
-//     {
-//         $hooks->register('requests.before_request', array($this, 'before_request'));
-//     }
-
-//     public function before_request(&$url, &$headers, &$data, &$type, &$options)
-//     {
-//         $headers['Authorization'] = 'Bearer ' . $this->token;
-//     }
-// }
-
 /**
  * Request class to communicate to the request libarary
  */
@@ -59,7 +37,8 @@ class NimbblRequest
      */
     public function request($method, $url, $data = array())
     {
-        error_log(__FILE__ . ": NimbblRequest::request START" . PHP_EOL);
+        NimbblLogger::getInstance()->log("request START - method: {$method}, url: {$url}", 'INFO', 'NimbblRequest');
+        
         try {
             $endpoint = $url;
             $url = NimbblApi::getFullUrl($url);
@@ -73,33 +52,32 @@ class NimbblRequest
             $headers = $this->getRequestHeaders();
             $headers['Authorization'] = 'Bearer ' . $nimbblToken['token'];
             $requestBody = (strtolower($method) === 'post') ? json_encode($data) : $data;
-            error_log(__FILE__ . ": NimbblRequest::request ENDPOINT: $endpoint" . PHP_EOL);
-            error_log(__FILE__ . ": NimbblRequest::request FULL REQUEST: " . print_r([
-                'method' => $method,
-                'endpoint' => $endpoint,
-                'url' => $url,
-                'headers' => $headers,
-                'body' => $requestBody
-            ], true) . PHP_EOL);
+            
+            NimbblLogger::getInstance()->log("request PREPARED - endpoint: {$endpoint}, fullUrl: {$url}", 'DEBUG', 'NimbblRequest');
+            NimbblLogger::getInstance()->log("request HEADERS: " . print_r($headers, true), 'DEBUG', 'NimbblRequest');
+            NimbblLogger::getInstance()->log("request BODY: " . $requestBody, 'DEBUG', 'NimbblRequest');
+            
             $response = Requests::request($url, $headers, $requestBody, $method, $options);
-            error_log(__FILE__ . ": NimbblRequest::request FULL RESPONSE: " . print_r([
-                'status_code' => $response->status_code,
-                'headers' => $response->headers,
-                'body' => $response->body
-            ], true) . PHP_EOL);
+            
+            NimbblLogger::getInstance()->log("request RESPONSE - status: {$response->status_code}", 'INFO', 'NimbblRequest');
+            NimbblLogger::getInstance()->log("response HEADERS: " . print_r($response->headers, true), 'DEBUG', 'NimbblRequest');
+            NimbblLogger::getInstance()->log("response BODY: " . $response->body, 'DEBUG', 'NimbblRequest');
+            
             $result = json_decode($response->body, true);
-            error_log(__FILE__ . ": NimbblRequest::request API DECODED RESPONSE: " . print_r($result, true) . PHP_EOL);
-            error_log(__FILE__ . ": NimbblRequest::request END" . PHP_EOL);
+            NimbblLogger::getInstance()->log("request DECODED RESPONSE: " . print_r($result, true), 'DEBUG', 'NimbblRequest');
+            NimbblLogger::getInstance()->log("request END - SUCCESS", 'INFO', 'NimbblRequest');
+            
             return $result;
         } catch (Exception $e) {
-            error_log(__FILE__ . ": NimbblRequest::request ERROR: " . $e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL);
+            NimbblLogger::getInstance()->log("request ERROR: " . $e->getMessage() . PHP_EOL . $e->getTraceAsString(), 'ERROR', 'NimbblRequest');
             throw $e;
         }
     }
 
     public function universalRequest($method, $url, $data = array())
     {
-        error_log(__FILE__ . ": NimbblRequest::universalRequest START" . PHP_EOL);
+        NimbblLogger::getInstance()->log("universalRequest START - method: {$method}, url: {$url}", 'INFO', 'NimbblRequest');
+        
         try {
             $endpoint = $url;
             $url = NimbblApi::getFullUrl($url);
@@ -113,35 +91,33 @@ class NimbblRequest
             $headers = $this->getRequestHeaders();
             $headers['Authorization'] = 'Bearer ' . $nimbblToken['token'];
             $requestBody = (strtolower($method) === 'post') ? json_encode($data) : $data;
-            error_log(__FILE__ . ": NimbblRequest::universalRequest ENDPOINT: $endpoint" . PHP_EOL);
-            error_log(__FILE__ . ": NimbblRequest::universalRequest FULL REQUEST: " . print_r([
-                'method' => $method,
-                'endpoint' => $endpoint,
-                'url' => $url,
-                'headers' => $headers,
-                'body' => $requestBody
-            ], true) . PHP_EOL);
+            
+            NimbblLogger::getInstance()->log("universalRequest PREPARED - endpoint: {$endpoint}, fullUrl: {$url}", 'DEBUG', 'NimbblRequest');
+            NimbblLogger::getInstance()->log("universalRequest HEADERS: " . print_r($headers, true), 'DEBUG', 'NimbblRequest');
+            NimbblLogger::getInstance()->log("universalRequest BODY: " . $requestBody, 'DEBUG', 'NimbblRequest');
+            
             $response = Requests::request($url, $headers, $requestBody, $method, $options);
-            error_log(__FILE__ . ": NimbblRequest::universalRequest FULL RESPONSE: " . print_r([
-                'status_code' => $response->status_code,
-                'headers' => $response->headers,
-                'body' => $response->body
-            ], true) . PHP_EOL);
+            
+            NimbblLogger::getInstance()->log("universalRequest RESPONSE - status: {$response->status_code}", 'INFO', 'NimbblRequest');
+            NimbblLogger::getInstance()->log("universalRequest response HEADERS: " . print_r($response->headers, true), 'DEBUG', 'NimbblRequest');
+            NimbblLogger::getInstance()->log("universalRequest response BODY: " . $response->body, 'DEBUG', 'NimbblRequest');
+            
             $result = json_decode($response->body, true);
-            error_log(__FILE__ . ": NimbblRequest::universalRequest API DECODED RESPONSE: " . print_r($result, true) . PHP_EOL);
-            error_log(__FILE__ . ": NimbblRequest::universalRequest END" . PHP_EOL);
+            NimbblLogger::getInstance()->log("universalRequest DECODED RESPONSE: " . print_r($result, true), 'DEBUG', 'NimbblRequest');
+            NimbblLogger::getInstance()->log("universalRequest END - SUCCESS", 'INFO', 'NimbblRequest');
+            
             return $result;
         } catch (Exception $e) {
-            error_log(__FILE__ . ": NimbblRequest::universalRequest ERROR: " . $e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL);
+            NimbblLogger::getInstance()->log("universalRequest ERROR: " . $e->getMessage() . PHP_EOL . $e->getTraceAsString(), 'ERROR', 'NimbblRequest');
             throw $e;
         }
     }
 
     public function setCurlSslOpts($curl)
     {
-        error_log("NimbblRequest::setCurlSslOpts START");
+        NimbblLogger::getInstance()->log("setCurlSslOpts START", 'DEBUG', 'NimbblRequest');
         curl_setopt($curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_1);
-        error_log("NimbblRequest::setCurlSslOpts END");
+        NimbblLogger::getInstance()->log("setCurlSslOpts END", 'DEBUG', 'NimbblRequest');
     }
 
     /**
@@ -152,9 +128,22 @@ class NimbblRequest
      */
     public static function addHeader($key, $value)
     {
-        error_log("NimbblRequest::addHeader START");
+        $logMessage = "[NimbblRequest] addHeader START - key: {$key}, value: {$value}" . PHP_EOL;
+        error_log($logMessage);
+        
+        // Also write to custom log file
+        $logFile = dirname(__FILE__) . '/../../../logs/nimbbl_debug.log';
+        $logDir = dirname($logFile);
+        if (!is_dir($logDir)) {
+            mkdir($logDir, 0755, true);
+        }
+        file_put_contents($logFile, $logMessage, FILE_APPEND | LOCK_EX);
+        
         self::$headers[$key] = $value;
-        error_log("NimbblRequest::addHeader END");
+        
+        $endMessage = "[NimbblRequest] addHeader END" . PHP_EOL;
+        error_log($endMessage);
+        file_put_contents($logFile, $endMessage, FILE_APPEND | LOCK_EX);
     }
 
     /**
@@ -163,9 +152,23 @@ class NimbblRequest
      */
     public static function getHeaders()
     {
-        error_log("NimbblRequest::getHeaders START");
+        $logMessage = "[NimbblRequest] getHeaders START" . PHP_EOL;
+        error_log($logMessage);
+        
+        // Also write to custom log file
+        $logFile = dirname(__FILE__) . '/../../../logs/nimbbl_debug.log';
+        $logDir = dirname($logFile);
+        if (!is_dir($logDir)) {
+            mkdir($logDir, 0755, true);
+        }
+        file_put_contents($logFile, $logMessage, FILE_APPEND | LOCK_EX);
+        
         $headers = self::$headers;
-        error_log("NimbblRequest::getHeaders END");
+        
+        $endMessage = "[NimbblRequest] getHeaders END - headers: " . print_r($headers, true) . PHP_EOL;
+        error_log($endMessage);
+        file_put_contents($logFile, $endMessage, FILE_APPEND | LOCK_EX);
+        
         return $headers;
     }
 
@@ -175,72 +178,76 @@ class NimbblRequest
      */
     protected function checkErrors($response)
     {
-        error_log("NimbblRequest::checkErrors START");
+        NimbblLogger::getInstance()->log("checkErrors START - status: {$response->status_code}", 'INFO', 'NimbblRequest');
+        
         $body = $response->body;
         $httpStatusCode = $response->status_code;
 
         try {
             $body = json_decode($response->body, true);
         } catch (Exception $e) {
-            error_log("NimbblRequest::checkErrors ERROR: " . $e->getMessage());
+            NimbblLogger::getInstance()->log("checkErrors ERROR: " . $e->getMessage(), 'ERROR', 'NimbblRequest');
             $this->throwServerError($body, $httpStatusCode);
         }
 
         if (($httpStatusCode < 200) or ($httpStatusCode >= 300)) {
             $this->processError($body, $httpStatusCode, $response);
         }
-        error_log("NimbblRequest::checkErrors END");
+        
+        NimbblLogger::getInstance()->log("checkErrors END", 'INFO', 'NimbblRequest');
     }
 
     protected function processError($body, $httpStatusCode, $response)
     {
-        error_log("NimbblRequest::processError START");
+        NimbblLogger::getInstance()->log("processError START - status: {$httpStatusCode}", 'INFO', 'NimbblRequest');
+        
         // TODO: FIXME based on the error structure coming from NimbblAPI.
         $code = $body['error']['code'];
         $description = $body['error']['description'];
-        error_log("NimbblRequest::processError ERROR: $description ($code)");
+        
+        NimbblLogger::getInstance()->log("processError ERROR: {$description} ({$code})", 'ERROR', 'NimbblRequest');
         throw new NimbblError($description, $code, $httpStatusCode);
-        error_log("NimbblRequest::processError END");
     }
 
     protected function throwServerError($body, $httpStatusCode)
     {
-        error_log("NimbblRequest::throwServerError START");
+        NimbblLogger::getInstance()->log("throwServerError START - status: {$httpStatusCode}", 'INFO', 'NimbblRequest');
+        
         $description = "The server did not send back a well-formed response. Server response: $body";
-        error_log("NimbblRequest::throwServerError ERROR: $description");
+        NimbblLogger::getInstance()->log("throwServerError ERROR: {$description}", 'ERROR', 'NimbblRequest');
         throw new NimbblError($description, NimbblErrorCode::SERVER_ERROR, $httpStatusCode);
-        error_log("NimbblRequest::throwServerError END");
     }
 
     public function getRequestHeaders()
     {
-        error_log("NimbblRequest::getRequestHeaders START");
+        NimbblLogger::getInstance()->log("getRequestHeaders START", 'DEBUG', 'NimbblRequest');
+        
         $uaHeader = array(
             'User-Agent' => $this->constructUa()
         );
 
         $headers = array_merge(self::$headers, $uaHeader);
 
-        error_log("NimbblRequest::getRequestHeaders END");
+        NimbblLogger::getInstance()->log("getRequestHeaders END - headers: " . print_r($headers, true), 'DEBUG', 'NimbblRequest');
         return $headers;
     }
 
     protected function constructUa()
     {
-        error_log("NimbblRequest::constructUa START");
+        NimbblLogger::getInstance()->log("constructUa START", 'DEBUG', 'NimbblRequest');
+        
         $ua = 'Nimbbl/v1 PHPSDK/' . NimbblApi::VERSION . ' PHP/' . phpversion();
-
         $ua .= ' ' . $this->getAppDetailsUa();
 
-        error_log("NimbblRequest::constructUa END");
+        NimbblLogger::getInstance()->log("constructUa END - ua: {$ua}", 'DEBUG', 'NimbblRequest');
         return $ua;
     }
 
     protected function getAppDetailsUa()
     {
-        error_log("NimbblRequest::getAppDetailsUa START");
+        NimbblLogger::getInstance()->log("getAppDetailsUa START", 'DEBUG', 'NimbblRequest');
+        
         $appsDetails = NimbblApi::$appsDetails;
-
         $appsDetailsUa = '';
 
         foreach ($appsDetails as $app) {
@@ -255,55 +262,31 @@ class NimbblRequest
             }
         }
 
-        error_log("NimbblRequest::getAppDetailsUa END");
+        NimbblLogger::getInstance()->log("getAppDetailsUa END - ua: {$appsDetailsUa}", 'DEBUG', 'NimbblRequest');
         return $appsDetailsUa;
     }
 
     public function generateToken()
     {
-        error_log("NimbblRequest::generateToken START");
+        NimbblLogger::getInstance()->log("generateToken START", 'DEBUG', 'NimbblRequest');
+        
         try {
             $nimbblSegment = new NimbblSegment();
             $tokenResponse = Requests::post(NimbblApi::getTokenEndpoint(), ['Content-Type' => 'application/json'], json_encode(['access_key' => NimbblApi::getKey(), 'access_secret' => NimbblApi::getSecret()]));
             $tokenResponseBody = json_decode($tokenResponse->body, true);
             
+            NimbblLogger::getInstance()->log("generateToken RESPONSE - status: {$tokenResponse->status_code}", 'DEBUG', 'NimbblRequest');
+            NimbblLogger::getInstance()->log("generateToken RESPONSE BODY: " . print_r($tokenResponseBody, true), 'DEBUG', 'NimbblRequest');
+            
             if (key_exists('error', $tokenResponseBody)) {
-                error_log('['.date("Y-m-d H:i:s").'] [ERROR] => Generate Token failed due to '.$tokenResponseBody['error']['nimbbl_error_code']);
+                NimbblLogger::getInstance()->log("generateToken ERROR: " . $tokenResponseBody['error']['nimbbl_error_code'], 'ERROR', 'NimbblRequest');
             }
-            error_log("NimbblRequest::generateToken END");
+            
+            NimbblLogger::getInstance()->log("generateToken END - SUCCESS", 'DEBUG', 'NimbblRequest');
             return $tokenResponseBody;
         } catch (Exception $e) {
-            error_log("NimbblRequest::generateToken ERROR: " . $e->getMessage());
+            NimbblLogger::getInstance()->log("generateToken ERROR: " . $e->getMessage(), 'ERROR', 'NimbblRequest');
             throw $e;
         }
     }
-
-    // /**
-    //  * Verifies error is in proper format. If not then
-    //  * throws ServerErrorException
-    //  *
-    //  * @param  array $body
-    //  * @param  int $httpStatusCode
-    //  * @return void
-    //  */
-    // protected function verifyErrorFormat($body, $httpStatusCode)
-    // {
-    //     if (is_array($body) === false)
-    //     {
-    //         $this->throwServerError($body, $httpStatusCode);
-    //     }
-
-    //     if ((isset($body['error']) === false) or
-    //         (isset($body['error']['code']) === false))
-    //     {
-    //         $this->throwServerError($body, $httpStatusCode);
-    //     }
-
-    //     $code = $body['error']['code'];
-
-    //     if (Errors\ErrorCode::exists($code) === false)
-    //     {
-    //         $this->throwServerError($body, $httpStatusCode);
-    //     }
-    // }
 }

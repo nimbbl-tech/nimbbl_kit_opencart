@@ -14,13 +14,7 @@ class NimbblApi
 
     protected static $merchantId;
 
-    /*
-     * App info is to store the Plugin/integration
-     * information
-     */
-    // public static $appsDetails = array();
-
-    const VERSION = '3.0.0-vdc';
+    const VERSION = '3.6.9';
 
     /*
      * App info is to store the Plugin/integration
@@ -28,20 +22,23 @@ class NimbblApi
      */
     public static $appsDetails = [];
 
+
     /**
      * @param string $key
      * @param string $secret
      */
     public function __construct($key, $secret, $url=null, $apiVersion = null)
     {
-        error_log(__FILE__ . ": NimbblApi::__construct START" . PHP_EOL);
+        NimbblLogger::getInstance()->log("__construct START - key: " . substr($key, 0, 4) . "****, url: " . ($url ?? 'default'), 'DEBUG');
+        
         self::$key = $key;
         self::$secret = $secret;
         if($url != null)
             self::$baseUrl = $url;
         if($apiVersion != null)
             self::$apiVersion = $apiVersion;
-        error_log(__FILE__ . ": NimbblApi::__construct END" . PHP_EOL);
+            
+        NimbblLogger::getInstance()->log("__construct END - baseUrl: " . self::$baseUrl . ", apiVersion: " . self::$apiVersion);
     }
 
     /*
@@ -49,30 +46,10 @@ class NimbblApi
      */
     public function setHeader($header, $value)
     {
-        error_log(__FILE__ . ": NimbblApi::setHeader START" . PHP_EOL);
+        NimbblLogger::getInstance()->log("setHeader START - header: {$header}, value: {$value}");
         \Nimbbl\Api\NimbblRequest::addHeader($header, $value);
-        error_log(__FILE__ . ": NimbblApi::setHeader END" . PHP_EOL);
+        NimbblLogger::getInstance()->log("setHeader END");
     }
-
-    // public function setAppDetails($title, $version = null)
-    // {
-    //     $app = array(
-    //         'title' => $title,
-    //         'version' => $version
-    //     );
-
-    //     array_push(self::$appsDetails, $app);
-    // }
-
-    // public function getAppsDetails()
-    // {
-    //     return self::$appsDetails;
-    // }
-
-    // public function setBaseUrl($baseUrl)
-    // {
-    //     self::$baseUrl = $baseUrl;
-    // }
 
     /**
      * @param string $name
@@ -80,84 +57,85 @@ class NimbblApi
      */
     public function __get($name)
     {
-        error_log(__FILE__ . ": NimbblApi::__get START" . PHP_EOL);
+        NimbblLogger::getInstance()->log("__get START - name: {$name}");
         $className = __NAMESPACE__ . '\\Nimbbl' . ucwords($name);
 
         $entity = new $className();
 
-        error_log(__FILE__ . ": NimbblApi::__get END" . PHP_EOL);
+        NimbblLogger::getInstance()->log("__get END - created entity: {$className}");
         return $entity;
     }
 
     public static function getBaseUrl()
     {
-        error_log(__FILE__ . ": NimbblApi::getBaseUrl START" . PHP_EOL);
+        NimbblLogger::getInstance()->log("getBaseUrl START");
         $url = self::$baseUrl;
         // Set default if not set or empty
         if (empty($url)) {
             $url = 'https://api.nimbbl.tech/api/';
             self::$baseUrl = $url;
+            NimbblLogger::getInstance()->log("getBaseUrl - Set default URL: {$url}");
         }
-        error_log(__FILE__ . ": NimbblApi::getBaseUrl value: $url" . PHP_EOL);
-        error_log(__FILE__ . ": NimbblApi::getBaseUrl END" . PHP_EOL);
+        NimbblLogger::getInstance()->log("getBaseUrl END - returning: {$url}");
         return $url;
     }
 
     public static function getAPIVersion() {
-        error_log(__FILE__ . ": NimbblApi::getAPIVersion START" . PHP_EOL);
+        NimbblLogger::getInstance()->log("getAPIVersion START");
         $ver = self::$apiVersion;
-        error_log(__FILE__ . ": NimbblApi::getAPIVersion END" . PHP_EOL);
+        NimbblLogger::getInstance()->log("getAPIVersion END - returning: {$ver}");
         return $ver;
     }
 
     public static function getKey()
     {
-        error_log(__FILE__ . ": NimbblApi::getKey START" . PHP_EOL);
+        NimbblLogger::getInstance()->log("getKey START");
         $key = self::$key;
-        error_log(__FILE__ . ": NimbblApi::getKey END" . PHP_EOL);
+        $maskedKey = $key ? substr($key, 0, 4) . str_repeat('*', max(0, strlen($key) - 8)) . substr($key, -4) : 'null';
+        NimbblLogger::getInstance()->log("getKey END - returning masked key: {$maskedKey}");
         return $key;
     }
 
     public static function getSecret()
     {
-        error_log(__FILE__ . ": NimbblApi::getSecret START" . PHP_EOL);
+        NimbblLogger::getInstance()->log("getSecret START");
         $secret = self::$secret;
-        error_log(__FILE__ . ": NimbblApi::getSecret END" . PHP_EOL);
+        $maskedSecret = $secret ? substr($secret, 0, 4) . str_repeat('*', max(0, strlen($secret) - 8)) . substr($secret, -4) : 'null';
+        NimbblLogger::getInstance()->log("getSecret END - returning masked secret: {$maskedSecret}");
         return $secret;
     }
 
     public static function getTokenEndpoint()
     {
-        error_log(__FILE__ . ": NimbblApi::getTokenEndpoint START" . PHP_EOL);
+        NimbblLogger::getInstance()->log("getTokenEndpoint START");
         $baseUrl = rtrim(self::getBaseUrl(), '/');
         $apiVersion = ltrim(self::getAPIVersion(), '/');
         $endpoint = $baseUrl . '/' . $apiVersion . '/generate-token';
-        error_log(__FILE__ . ": NimbblApi::getTokenEndpoint value: $endpoint" . PHP_EOL);
-        error_log(__FILE__ . ": NimbblApi::getTokenEndpoint END" . PHP_EOL);
+        NimbblLogger::getInstance()->log("getTokenEndpoint END - returning: {$endpoint}");
         return $endpoint;
     }
 
     public static function getFullUrl($relativeUrl)
     {
-        error_log(__FILE__ . ": NimbblApi::getFullUrl START" . PHP_EOL);
+        NimbblLogger::getInstance()->log("getFullUrl START - relativeUrl: {$relativeUrl}");
         $baseUrl = rtrim(self::getBaseUrl(), '/');
         $relativeUrl = ltrim($relativeUrl, '/');
         $url = $baseUrl . '/' . $relativeUrl;
-        error_log(__FILE__ . ": NimbblApi::getFullUrl END" . PHP_EOL);
+        NimbblLogger::getInstance()->log("getFullUrl END - returning: {$url}");
         return $url;
     }
 
     public static function setMerchantId($merchantId){
-        error_log(__FILE__ . ": NimbblApi::setMerchantId START" . PHP_EOL);
+        NimbblLogger::getInstance()->log("setMerchantId START - merchantId: {$merchantId}");
         self::$merchantId = $merchantId;
-        error_log(__FILE__ . ": NimbblApi::setMerchantId END" . PHP_EOL);
+        NimbblLogger::getInstance()->log("setMerchantId END");
         return true;
     }
 
     public static function getMerchantId(){
-        error_log(__FILE__ . ": NimbblApi::getMerchantId START" . PHP_EOL);
+        NimbblLogger::getInstance()->log("getMerchantId START");
         $id = self::$merchantId;
-        error_log(__FILE__ . ": NimbblApi::getMerchantId END" . PHP_EOL);
+        NimbblLogger::getInstance()->log("getMerchantId END - returning: " . ($id ?? 'null'));
         return $id;
     }
 }

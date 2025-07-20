@@ -190,48 +190,28 @@ class ControllerExtensionPaymentNimbbl extends Controller {
 			<input type="hidden" name="cart_order_id" id="cart_order_id" value="'.$this->session->data['order_id'].'">
 		</form>';
 
-		// Remove old checkout.js and use module import
-		$html .= "<div class='buttons'>
-			<div class='pull-right'>
-				<input type='submit'
-					id='nimbbl-confirm-btn'
-					value='".$this->language->get('button_confirm')."'
-					class='btn btn-primary' />
-			</div>
-		</div>";
+		$html .= '<script type="text/javascript" src="https://api.nimbbl.tech/static/assets/js/checkout.js" />';
 
-		$html .= '<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sonic-widget@latest/dist/index.min.js" />';
+		//$html .= '<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sonic-widget@latest/dist/index.min.js" />';
 
-		// Remove old checkout.js and use module import
-		$html .= '<script type="text/javascript">
+		$html .='<script type="text/javascript">
 
-			// Debug line for the JavaScript console to confirm token value
-			console.log("DEBUG: Nimbbl checkout token being used:", "'.$newOrder->token.'");
+			function openModal() {					
+				var options = {
+					"access_key": "'.$this->publickey.'", 
+					"order_id": "'.$nimbblorder['order_id'].'",
 
-			// const checkout = new Checkout({ token: "'.$newOrder->token.'" }); 
-			// You must have this token from your backend
+					"callback_handler": function (response) {
+						console.log("callback_handler - ", response);
 
-			document.addEventListener("DOMContentLoaded", function () {
-				document.addEventListener("click", function (event) {
-					if (event.target && event.target.id === "nimbbl-confirm-btn") {
-						event.preventDefault();
-						console.log("Dynamic button clicked!");
-					}
-				}
-			});
-
-			function openModal() {
-				const options = {
-					callback_handler: function(response) {
-						console.log("callback_handler - ", response); // Keep this existing debug
-
-						if (response.status === "success") {
+						if (response.status === "success") {									
 							document.getElementById("nimbbl_order_id").value = response.order_id;
 							document.getElementById("nimbbl_transaction_id").value = response.transaction_id;
 							document.getElementById("nimbbl_signature").value = response.signature;
 							document.getElementById("nimbbl_status").value = response.status;
 							document.nimbblform.submit();
 						} else {
+							document.nimbblform.action = document.getElementById("nimbbl_cancel_url").value;
 							document.getElementById("nimbbl_order_id").value = response.order_id;
 							document.getElementById("nimbbl_status").value = response.status;
 							document.getElementById("nimbbl_reason").value = response.reason;
@@ -240,10 +220,16 @@ class ControllerExtensionPaymentNimbbl extends Controller {
 					}
 				};
 
-				// checkout.open(options);
+				window.checkout = new NimbblCheckout(options);
+				window.checkout.open("'.$nimbblorder['order_id'].'");
 			}
-			
 		</script>';
+
+		$html .= "<div class='buttons'>
+			<div class='pull-right'><input type='submit' 
+				value='".$this->language->get('button_confirm')."' class='btn btn-primary' onclick='event.preventDefault(); openModal(); return false;' /></div>
+			</div>";
+			
 
 		// Debug line before returning the final HTML
 		error_log('DEBUG: Nimbbl payment HTML generated and returned successfully.');
@@ -263,32 +249,56 @@ class ControllerExtensionPaymentNimbbl extends Controller {
 				
 			$order_info = $this->model_checkout_order->getOrder($this->session->data['order_id']);
 			
+			// Get POST data
+			$postData = $this->request->post;
+			// Fallback: If data is sent as JSON (not form-encoded)
+			if (empty($postData) && file_get_contents('php://input')) {
+				$postData = json_decode(file_get_contents('php://input'), true);
+			}
+
+			error_log('DEBUG: Raw callback data: ' . print_r($postData, true));
+
+			// Extract required fields for attributes array
+			$invoice_id = $postData['order']['invoice_id'] ?? $this->session->data['order_id'] ?? '';
+			$nimbbl_transaction_id = $postData['nimbbl_transaction_id'] ?? '';
+			$signature = $postData['nimbbl_signature'] ?? $postData['signature'] ?? '';
+			$signature_version = $postData['signature_version'] ?? 'v3';
+			$transaction_amount = $postData['transaction_amount'] ?? $order_info['total'];
+			$transaction_currency = $postData['transaction_currency'] ?? $order_info['currency_code'];
+			$transaction_status = $postData['status'] ?? $postData['nimbbl_status'] ?? 'failed';
+			$transaction_type = $postData['transaction_type'] ?? 'payment';
+
 			$attributes = [
-                'transaction' => [
-                    'signature' => $this->request->post['nimbbl_signature'],
-                    'signature_version' => $this->request->post['signature_version'] ?? null,
-                    'transaction_amount' => $this->request->post['transaction_amount'] ?? $order_info['total'],
-                    'transaction_currency' => $this->request->post['transaction_currency'] ?? $order_info['currency_code'],
-                    'status' => $this->request->post['status'] ?? $this->request->post['nimbbl_status'] ?? null,
-                    'transaction_type' => $this->request->post['transaction_type'] ?? null,
-                ],
-                'nimbbl_transaction_id' => $this->request->post['nimbbl_transaction_id'],
-                'order' => [
-                    'invoice_id' => $this->session->data['order_id'],
-                ]
-            ];
-            $verified = $this->nimbbl_api->util->verifyPaymentSignature($attributes, $order_info['total']);
-			
-			
+				'transaction' => [
+					'signature' => $signature,
+					'signature_version' => $signature_version,
+					'transaction_amount' => $transaction_amount,
+					'transaction_currency' => $transaction_currency,
+					'status' => $transaction_status,
+					'transaction_type' => $transaction_type,
+				],
+				'nimbbl_transaction_id' => $nimbbl_transaction_id,
+				'order' => [
+					'invoice_id' => $invoice_id,
+				]
+			];
+
+			// Debug log: attributes and order amount
+			error_log('DEBUG: Nimbbl callback attributes: ' . print_r($attributes, true));
+			error_log('DEBUG: Nimbbl callback order amount: ' . print_r($order_info['total'], true));
+
+			$verified = $this->nimbbl_api->util->verifyPaymentSignature($attributes, $order_info['total']);
+			error_log('DEBUG: Nimbbl signature verification result: ' . ($verified ? 'true' : 'false'));
+
 			$message='';
 			try {
-                if($verified && !empty($order_info)){					                    
-
-                        if($this->request->post['nimbbl_status']!= 'success'){
-							$message .='Payment cancelled or failed - '.$this->request->post['nimbbl_reason'];
-							$this->session->data['error'] = $message;		
-							$this->response->redirect($this->url->link('checkout/checkout', '', true));							
-                        }
+				if($verified && !empty($order_info)){
+					if($transaction_status != 'success'){
+						$message .='Payment cancelled or failed - '.($postData['nimbbl_reason'] ?? '');
+						$this->session->data['error'] = $message;
+						error_log('DEBUG: Payment not successful. Status: ' . $transaction_status . ', Reason: ' . ($postData['nimbbl_reason'] ?? ''));
+						$this->response->redirect($this->url->link('checkout/checkout', '', true));
+					}
 
                         if($order_info['order_status_id'] != $this->orderstatusid && $this->request->post['nimbbl_status'] == 'success')
 						{

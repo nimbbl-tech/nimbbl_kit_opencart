@@ -21,7 +21,8 @@ class NimbblOrder extends NimbblEntity implements JsonSerializable
 
     public function retrieveMany($options = array())
     {
-        error_log(__FILE__ . ": NimbblOrder::retrieveMany START" . PHP_EOL);
+        NimbblLogger::getInstance()->log("retrieveMany START - options: " . print_r($options, true), 'DEBUG', 'NimbblOrder');
+        
         $f = base64_encode($this->buildHttpQuery($options));
         $nimbblRequest = new NimbblRequest();
         $manyEntities = $nimbblRequest->request('GET', 'orders/many?f=' . $f . '&pt=no');
@@ -31,7 +32,8 @@ class NimbblOrder extends NimbblEntity implements JsonSerializable
                 $users[] = $this->fillOne($oneEntity);
             }
         }
-        error_log(__FILE__ . ": NimbblOrder::retrieveMany END" . PHP_EOL);
+        
+        NimbblLogger::getInstance()->log("retrieveMany END - found " . count($users) . " entities", 'DEBUG', 'NimbblOrder');
         return [
             'items' => $users,
             'meta' => $manyEntities['_meta'] ?? []
@@ -40,7 +42,9 @@ class NimbblOrder extends NimbblEntity implements JsonSerializable
 
     public function create($attributes = array(), $apiVersion = 'v3')
     {
-        error_log(__FILE__ . ": NimbblOrder::create START" . PHP_EOL);
+        NimbblLogger::getInstance()->log("create START - apiVersion: {$apiVersion}", 'DEBUG', 'NimbblOrder');
+        NimbblLogger::getInstance()->log("create ATTRIBUTES: " . print_r($attributes, true), 'DEBUG', 'NimbblOrder');
+        
         try {
             $endpoint = $apiVersion.'/create-order';
             $fullUrl = \Nimbbl\Api\NimbblApi::getFullUrl($endpoint);
@@ -49,14 +53,11 @@ class NimbblOrder extends NimbblEntity implements JsonSerializable
             $tokenArr = $nimbblRequest->generateToken();
             $headers['Authorization'] = 'Bearer ' . $tokenArr['token'];
             $requestBody = json_encode($attributes);
-            error_log(__FILE__ . ": NimbblOrder::create ENDPOINT: $endpoint" . PHP_EOL);
-            error_log(__FILE__ . ": NimbblOrder::create FULL REQUEST: " . print_r([
-                'method' => 'POST',
-                'endpoint' => $endpoint,
-                'url' => $fullUrl,
-                'headers' => $headers,
-                'body' => $requestBody
-            ], true) . PHP_EOL);
+            
+            NimbblLogger::getInstance()->log("create PREPARED - endpoint: {$endpoint}, fullUrl: {$fullUrl}", 'DEBUG', 'NimbblOrder');
+            NimbblLogger::getInstance()->log("create HEADERS: " . print_r($headers, true), 'DEBUG', 'NimbblOrder');
+            NimbblLogger::getInstance()->log("create BODY: " . $requestBody, 'DEBUG', 'NimbblOrder');
+            
             // Only make one API request and log the response
             $hooks = new \Requests_Hooks();
             $hooks->register('curl.before_send', array($nimbblRequest, 'setCurlSslOpts'));
@@ -65,83 +66,96 @@ class NimbblOrder extends NimbblEntity implements JsonSerializable
                 'timeout' => 60,
             ];
             $rawResponse = \Requests::request($fullUrl, $headers, $requestBody, 'POST', $options);
-            error_log(__FILE__ . ": NimbblOrder::create FULL RESPONSE: " . print_r([
-                'status_code' => $rawResponse->status_code,
-                'headers' => $rawResponse->headers,
-                'body' => $rawResponse->body
-            ], true) . PHP_EOL);
+            
+            NimbblLogger::getInstance()->log("create RESPONSE - status: {$rawResponse->status_code}", 'DEBUG', 'NimbblOrder');
+            NimbblLogger::getInstance()->log("create response HEADERS: " . print_r($rawResponse->headers, true), 'DEBUG', 'NimbblOrder');
+            NimbblLogger::getInstance()->log("create response BODY: " . $rawResponse->body, 'DEBUG', 'NimbblOrder');
+            
             // Log the raw JSON response for debugging
-            error_log(__FILE__ . ": NimbblOrder::create RAW JSON RESPONSE: " . $rawResponse->body . PHP_EOL);
+            NimbblLogger::getInstance()->log("create RAW JSON RESPONSE: " . $rawResponse->body, 'DEBUG', 'NimbblOrder');
+            
             $createdEntity = json_decode($rawResponse->body, true);
             $newCreatedEntity = new NimbblOrder();
+            
             if (is_array($createdEntity) && isset($createdEntity['token'])) {
+                NimbblLogger::getInstance()->log("create SUCCESS - token found in response", 'DEBUG', 'NimbblOrder');
                 // Set all top-level fields as direct properties for easy access
                 foreach ($createdEntity as $key => $value) {
                     $newCreatedEntity->$key = $value;
                 }
                 $newCreatedEntity->attributes = $createdEntity;
             } elseif (is_array($createdEntity) && isset($createdEntity['order']) && is_array($createdEntity['order'])) {
+                NimbblLogger::getInstance()->log("create SUCCESS - order found in response", 'DEBUG', 'NimbblOrder');
                 $attributes = $createdEntity['order'];
                 $newCreatedEntity->attributes = $attributes;
                 if (isset($attributes['token'])) {
                     $newCreatedEntity->token = $attributes['token'];
                 }
             } elseif (is_array($createdEntity) && isset($createdEntity['error'])) {
+                NimbblLogger::getInstance()->log("create ERROR: " . print_r($createdEntity['error'], true), 'ERROR', 'NimbblOrder');
                 $newCreatedEntity->error = $createdEntity['error'];
-                error_log(__FILE__ . ": NimbblOrder::create ERROR: " . print_r($createdEntity['error'], true) . PHP_EOL);
             } else {
-                error_log(__FILE__ . ": NimbblOrder::create ERROR: Unexpected API response: " . print_r($createdEntity, true) . PHP_EOL);
+                NimbblLogger::getInstance()->log("create ERROR: Unexpected API response: " . print_r($createdEntity, true), 'ERROR', 'NimbblOrder');
             }
-            error_log(__FILE__ . ": NimbblOrder::create END" . print_r($newCreatedEntity, true). PHP_EOL);
+            
+            NimbblLogger::getInstance()->log("create END - result: " . print_r($newCreatedEntity, true), 'DEBUG', 'NimbblOrder');
             return $newCreatedEntity;
         } catch (\Exception $e) {
-            error_log(__FILE__ . ": NimbblOrder::create ERROR: " . $e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL);
+            NimbblLogger::getInstance()->log("create ERROR: " . $e->getMessage() . PHP_EOL . $e->getTraceAsString(), 'ERROR', 'NimbblOrder');
             throw $e;
         }
     }
 
     public function retrieveOne($id)
     {
-        error_log(__FILE__ . ": NimbblOrder::retrieveOne START" . PHP_EOL);
+        NimbblLogger::getInstance()->log("retrieveOne START - id: {$id}", 'DEBUG', 'NimbblOrder');
+        
         $nimbblRequest = new NimbblRequest();
         $oneEntity = $nimbblRequest->request('GET', 'v2/get-order/' . $id);
         $loadedEntity = $this->fillOne($oneEntity);
         $this->attributes = $loadedEntity->attributes;
         $this->error = $loadedEntity->error;
-        error_log(__FILE__ . ": NimbblOrder::retrieveOne END" . PHP_EOL);
+        
+        NimbblLogger::getInstance()->log("retrieveOne END - success", 'DEBUG', 'NimbblOrder');
         return $this;
     }
 
     public function edit($attributes = null)
     {
-        error_log(__FILE__ . ": NimbblOrder::edit START" . PHP_EOL);
+        NimbblLogger::getInstance()->log("edit START - attributes: " . print_r($attributes, true), 'DEBUG', 'NimbblOrder');
+        NimbblLogger::getInstance()->log("edit ERROR: Unsupported operation", 'ERROR', 'NimbblOrder');
         throw new Exception("Unsupported operation.");
-        error_log(__FILE__ . ": NimbblOrder::edit END" . PHP_EOL);
     }
 
     public function getOrderByInvoiceId($id, $apiVersion = 'v3'){
-        error_log(__FILE__ . ": NimbblOrder::getOrderByInvoiceId START" . PHP_EOL);
+        NimbblLogger::getInstance()->log("getOrderByInvoiceId START - id: {$id}, apiVersion: {$apiVersion}", 'DEBUG', 'NimbblOrder');
+        
         $nimbblrequest = new NimbblRequest();
         $response = $nimbblrequest->request('GET', $apiVersion.'/order?invoice_id='.$id);
+        
         if (is_array($response) && key_exists('error', $response)){
-            error_log('['.date("Y-m-d H:i:s").'] [ERROR] => Get Order By Invoice Id failed due to '.($response['error']['nimbbl_error_code'] ?? 'unknown'));
-            error_log(__FILE__ . ": NimbblOrder::getOrderByInvoiceId END" . PHP_EOL);
+            $errorCode = $response['error']['nimbbl_error_code'] ?? 'unknown';
+            NimbblLogger::getInstance()->log("getOrderByInvoiceId ERROR: Get Order By Invoice Id failed due to {$errorCode}", 'ERROR', 'NimbblOrder');
             return (array) $response['error'];
         }
-        error_log(__FILE__ . ": NimbblOrder::getOrderByInvoiceId END" . PHP_EOL);
+        
+        NimbblLogger::getInstance()->log("getOrderByInvoiceId END - success", 'DEBUG', 'NimbblOrder');
         return $response;
     }
 
     public function getOrderByOrderId($id, $apiVersion = 'v3'){
-        error_log(__FILE__ . ": NimbblOrder::getOrderByOrderId START" . PHP_EOL);
+        NimbblLogger::getInstance()->log("getOrderByOrderId START - id: {$id}, apiVersion: {$apiVersion}", 'DEBUG', 'NimbblOrder');
+        
         $nimbblrequest = new NimbblRequest();
         $response = $nimbblrequest->request('GET', $apiVersion.'/order?order_id='.$id);
+        
         if (is_array($response) && key_exists('error', $response)){
-            error_log('['.date("Y-m-d H:i:s").'] [ERROR] => Get Order By Order Id failed due to '.($response['error']['nimbbl_error_code'] ?? 'unknown'));
-            error_log(__FILE__ . ": NimbblOrder::getOrderByOrderId END" . PHP_EOL);
+            $errorCode = $response['error']['nimbbl_error_code'] ?? 'unknown';
+            NimbblLogger::getInstance()->log("getOrderByOrderId ERROR: Get Order By Order Id failed due to {$errorCode}", 'ERROR', 'NimbblOrder');
             return (array) $response['error'];
         }
-        error_log(__FILE__ . ": NimbblOrder::getOrderByOrderId END" . PHP_EOL);
+        
+        NimbblLogger::getInstance()->log("getOrderByOrderId END - success", 'DEBUG', 'NimbblOrder');
         return $response;
     }
 }
