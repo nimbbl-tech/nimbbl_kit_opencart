@@ -102,7 +102,7 @@ class NimbblUtil
         NimbblLogger::getInstance()->log(__METHOD__ . ' START - Raw value: ' . var_export($amount, true) . ' (type: ' . gettype($amount) . ')', 'DEBUG', 'NimbblUtil');
         // Remove commas and cast to float, then format to four decimals
         $numeric = (float) str_replace(',', '', (string) $amount);
-        $totalAmount = number_format($numeric, 4, '.', '');
+        $totalAmount = number_format($numeric, 2, '.', '');
         NimbblLogger::getInstance()->log(__METHOD__ . ' END - Result: ' . $totalAmount, 'DEBUG', 'NimbblUtil');
         return $totalAmount;
     }
