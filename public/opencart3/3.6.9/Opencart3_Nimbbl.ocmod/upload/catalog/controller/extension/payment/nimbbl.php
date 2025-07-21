@@ -142,7 +142,7 @@ class ControllerExtensionPaymentNimbbl extends Controller {
 			'custom_attributes' => $custom_attributes
 		);
 		// Add debug line for the arguments passed to create()
-		error_log('DEBUG: arg_order_data for Nimbbl order creation: ' . print_r($arg_order_data, true));
+		error_log('DEBUG: arg_order_data for Nimbbl order creation: ' . print_r($arg_order_data, true), 4, DIR_LOGS . 'nimbbl.log');
 
 
         // Always create a new Nimbbl order with a unique invoice_id
@@ -151,20 +151,20 @@ class ControllerExtensionPaymentNimbbl extends Controller {
         $newOrder = $this->nimbbl_api->order->create($arg_order_data);
         // Print the complete raw JSON response from the API
         if (isset($newOrder->raw_response)) {
-            error_log('DEBUG: Raw JSON response from Nimbbl create order: ' . $newOrder->raw_response);
+            error_log('DEBUG: Raw JSON response from Nimbbl create order: ' . $newOrder->raw_response, 4, DIR_LOGS . 'nimbbl.log');
         } else {
-            error_log('DEBUG: $newOrder (print_r): ' . print_r($newOrder, true));
+            error_log('DEBUG: $newOrder (print_r): ' . print_r($newOrder, true), 4, DIR_LOGS . 'nimbbl.log');
         }
-        error_log('DEBUG: Created new Nimbbl order: ' . print_r($newOrder, true));
+        error_log('DEBUG: Created new Nimbbl order: ' . print_r($newOrder, true), 4, DIR_LOGS . 'nimbbl.log');
         if ($newOrder->error) {
-            error_log('ERROR: Nimbbl order creation error: ' . print_r($newOrder->error, true));
+            error_log('ERROR: Nimbbl order creation error: ' . print_r($newOrder->error, true), 3, DIR_LOGS . 'nimbbl.log');
             return [
                 'error' => 'Nimbbl order creation failed: ' . print_r($newOrder->error, true),
                 'data' => ''
             ];
         }
         if (empty($newOrder->token)) {
-            error_log('ERROR: Nimbbl order token is missing. $newOrder: ' . print_r($newOrder, true));
+            error_log('ERROR: Nimbbl order token is missing. $newOrder: ' . print_r($newOrder, true), 3, DIR_LOGS . 'nimbbl.log');
             return [
                 'error' => 'Nimbbl order token missing, cannot initialize checkout.',
                 'data' => ''
@@ -174,7 +174,7 @@ class ControllerExtensionPaymentNimbbl extends Controller {
 
 		// Ensure $nimbblorder is set and has a token before proceeding
 		if (empty($nimbblorder) || !isset($nimbblorder['token'])) {
-			error_log('ERROR: Nimbbl order token is missing or $nimbblorder is not set.');
+			error_log('ERROR: Nimbbl order token is missing or $nimbblorder is not set.', 3, DIR_LOGS . 'nimbbl.log');
 			return [
 				'error' => 'Nimbbl order token missing, cannot initialize checkout.',
 				'data' => ''
@@ -232,7 +232,7 @@ class ControllerExtensionPaymentNimbbl extends Controller {
 			
 
 		// Debug line before returning the final HTML
-		error_log('DEBUG: Nimbbl payment HTML generated and returned successfully.');
+		error_log('DEBUG: Nimbbl payment HTML generated and returned successfully.', 4, DIR_LOGS . 'nimbbl.log');
 
 		return [
 			'error' => '',
@@ -256,7 +256,7 @@ class ControllerExtensionPaymentNimbbl extends Controller {
 				$postData = json_decode(file_get_contents('php://input'), true);
 			}
 
-			error_log('DEBUG: Raw callback data: ' . print_r($postData, true));
+			error_log('DEBUG: Raw callback data: ' . print_r($postData, true), 4, DIR_LOGS . 'nimbbl.log');
 
 			// Extract required fields for attributes array
 			$invoice_id = $postData['order']['invoice_id'] ?? $this->session->data['order_id'] ?? '';
@@ -284,11 +284,11 @@ class ControllerExtensionPaymentNimbbl extends Controller {
 			];
 
 			// Debug log: attributes and order amount
-			error_log('DEBUG: Nimbbl callback attributes: ' . print_r($attributes, true));
-			error_log('DEBUG: Nimbbl callback order amount: ' . print_r($order_info['total'], true));
+			error_log('DEBUG: Nimbbl callback attributes: ' . print_r($attributes, true), 4, DIR_LOGS . 'nimbbl.log');
+			error_log('DEBUG: Nimbbl callback order amount: ' . print_r($order_info['total'], true), 4, DIR_LOGS . 'nimbbl.log');
 
 			$verified = $this->nimbbl_api->util->verifyPaymentSignature($attributes, $order_info['total']);
-			error_log('DEBUG: Nimbbl signature verification result: ' . ($verified ? 'true' : 'false'));
+			error_log('DEBUG: Nimbbl signature verification result: ' . ($verified ? 'true' : 'false'), 4, DIR_LOGS . 'nimbbl.log');
 
 			$message='';
 			try {
@@ -296,7 +296,7 @@ class ControllerExtensionPaymentNimbbl extends Controller {
 					if($transaction_status != 'success'){
 						$message .='Payment cancelled or failed - '.($postData['nimbbl_reason'] ?? '');
 						$this->session->data['error'] = $message;
-						error_log('DEBUG: Payment not successful. Status: ' . $transaction_status . ', Reason: ' . ($postData['nimbbl_reason'] ?? ''));
+						error_log('DEBUG: Payment not successful. Status: ' . $transaction_status . ', Reason: ' . ($postData['nimbbl_reason'] ?? ''), 4, DIR_LOGS . 'nimbbl.log');
 						$this->response->redirect($this->url->link('checkout/checkout', '', true));
 					}
 
@@ -338,9 +338,9 @@ class ControllerExtensionPaymentNimbbl extends Controller {
 		if(!$post)
 			$this->response->redirect($this->url->link('', '', true));
 		
+		error_log('DEBUG: Raw webhook data: ' . $post, 4, DIR_LOGS . 'nimbbl.log');
 		$webhook_data = json_decode($post, true);
-		
-		$this->log->write("Webhook data:".$post);
+		error_log('DEBUG: Parsed webhook_data: ' . print_r($webhook_data, true), 4, DIR_LOGS . 'nimbbl.log');
 		
 		if (isset($webhook_data['nimbbl_transaction_id']) || !empty($webhook_data['order']['invoice_id'])) {
 			$this->language->load('extension/payment/nimbbl');
@@ -362,27 +362,31 @@ class ControllerExtensionPaymentNimbbl extends Controller {
                     'invoice_id' => $webhook_data['order']['invoice_id'],
                 ]
             ];
+            error_log('DEBUG: Nimbbl webhook attributes: ' . print_r($attributes, true), 4, DIR_LOGS . 'nimbbl.log');
+            error_log('DEBUG: Nimbbl webhook order amount: ' . print_r($order_info['total'], true), 4, DIR_LOGS . 'nimbbl.log');
+
             $verified = $this->nimbbl_api->util->verifyPaymentSignature($attributes, $order_info['total']);
-			
+            error_log('DEBUG: Nimbbl webhook signature verification result: ' . ($verified ? 'true' : 'false'), 4, DIR_LOGS . 'nimbbl.log');
+            
 			try {
-                if($verified && !empty($order_info)){					                    
+                if($verified && !empty($order_info)){                                         
 
                         if($order_info['order_status_id'] != $this->orderstatusid && $webhook_data['transaction']['status'] === 'succeeded')
-						{
-							$this->model_checkout_order->addOrderHistory($webhook_data['order']['invoice_id'], $this->orderstatusid,'Payment Successful (updated via webhook)',true);
-							
-                        }						
-						elseif($order_info['order_status_id'] == $this->orderstatusid && $webhook_data['transaction']['status'] === 'failed')
-						{
-									$this->model_checkout_order->addOrderHistory($webhook_data['order']['invoice_id'], $this->orderfailstatusid,'Payment Failed (updated via webhook)',true);									
+                        {
+                            $this->model_checkout_order->addOrderHistory($webhook_data['order']['invoice_id'], $this->orderstatusid,'Payment Successful (updated via webhook)',true);
+                            
+                        }                       
+                        elseif($order_info['order_status_id'] == $this->orderstatusid && $webhook_data['transaction']['status'] === 'failed')
+                        {
+                                    $this->model_checkout_order->addOrderHistory($webhook_data['order']['invoice_id'], $this->orderfailstatusid,'Payment Failed (updated via webhook)',true);                                   
 
-						}                    
+                        }                    
                 } 
 
-            } catch (Throwable $exception){               							
-				$this->log->write("Webhook Error:: " . $exception->getMessage());
-            }										
-		}
-	}	
+            } catch (Throwable $exception){                                               
+                error_log('Webhook Error:: ' . $exception->getMessage(), 3, DIR_LOGS . 'nimbbl.log');
+            }                                       
+        }
+    }	
 }
 ?>
