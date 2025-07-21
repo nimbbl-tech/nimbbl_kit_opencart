@@ -251,6 +251,7 @@ class ControllerExtensionPaymentNimbbl extends Controller {
 			
 			// Get POST data
 			$postData = $this->request->post;
+			error_log('DEBUG: Raw callback data before json decode' . print_r($postData, true), 4, DIR_LOGS . 'nimbbl.log')
 			// Fallback: If data is sent as JSON (not form-encoded)
 			if (empty($postData) && file_get_contents('php://input')) {
 				$postData = json_decode(file_get_contents('php://input'), true);
