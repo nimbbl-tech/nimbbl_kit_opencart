@@ -142,18 +142,20 @@ class ControllerExtensionPaymentNimbbl extends Controller {
 			'custom_attributes' => $custom_attributes
 		);
 		// Add debug line for the arguments passed to create()
-		error_log('DEBUG: arg_order_data for Nimbbl order creation: ' . print_r($arg_order_data, true), 0);
+		//error_log('DEBUG: arg_order_data for Nimbbl order creation: ' . print_r($arg_order_data, true), 0);
 
 
         // Always create a new Nimbbl order with a unique invoice_id
         $arg_order_data['invoice_id'] = $order_info['order_id'];
         $newOrder = $this->nimbbl_api->order->create($arg_order_data);
         // Print the complete raw JSON response from the API
-        if (isset($newOrder->raw_response)) {
+        /*
+		if (isset($newOrder->raw_response)) {
             error_log('DEBUG: Raw JSON response from Nimbbl create order: ' . $newOrder->raw_response, 0);
         } else {
             error_log('DEBUG: $newOrder (print_r): ' . print_r($newOrder, true), 0);
         }
+		*/	
         error_log('DEBUG: Created new Nimbbl order: ' . print_r($newOrder, true), 0);
         if ($newOrder->error) {
             error_log('ERROR: Nimbbl order creation error: ' . print_r($newOrder->error, true), 0);
@@ -172,6 +174,7 @@ class ControllerExtensionPaymentNimbbl extends Controller {
         $nimbblorder = $newOrder->attributes; // Optional, for reference
 
 		// Ensure $nimbblorder is set and has a token before proceeding
+		/*
 		if (empty($nimbblorder) || !isset($nimbblorder['token'])) {
 			error_log('ERROR: Nimbbl order token is missing or $nimbblorder is not set.', 0);
 			return [
@@ -179,6 +182,7 @@ class ControllerExtensionPaymentNimbbl extends Controller {
 				'data' => ''
 			];
 		}
+		*/	
 
 		$html = '<form id="nimbblform" name="nimbblform" action="'.$surl.'" method="POST">
 			<input type="hidden" name="nimbbl_order_id" id="nimbbl_order_id">
@@ -260,7 +264,7 @@ EOT;
 
 		// Log the raw input for debugging
 		$rawInput = file_get_contents('php://input');
-		error_log('DEBUG: Raw callback input: ' . $rawInput, 0);
+		//error_log('DEBUG: Raw callback input: ' . $rawInput, 0);
 		$postData = json_decode($rawInput, true);
 
 		// Fallback to POST if JSON is invalid
@@ -345,9 +349,9 @@ EOT;
 		if(!$post)
 			$this->response->redirect($this->url->link('', '', true));
 		
-		error_log('DEBUG: Raw webhook data: ' . $post, 0);
+		//error_log('DEBUG: Raw webhook data: ' . $post, 0);
 		$webhook_data = json_decode($post, true);
-		error_log('DEBUG: Parsed webhook_data: ' . print_r($webhook_data, true), 0);
+		//error_log('DEBUG: Parsed webhook_data: ' . print_r($webhook_data, true), 0);
 		
 		if (isset($webhook_data['nimbbl_transaction_id']) || !empty($webhook_data['order']['invoice_id'])) {
 			$this->language->load('extension/payment/nimbbl');

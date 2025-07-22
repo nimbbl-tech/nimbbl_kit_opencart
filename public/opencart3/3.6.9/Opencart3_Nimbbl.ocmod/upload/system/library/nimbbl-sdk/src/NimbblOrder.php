@@ -55,8 +55,8 @@ class NimbblOrder extends NimbblEntity implements JsonSerializable
             $requestBody = json_encode($attributes);
             
             NimbblLogger::getInstance()->log("create PREPARED - endpoint: {$endpoint}, fullUrl: {$fullUrl}", 'DEBUG', 'NimbblOrder');
-            NimbblLogger::getInstance()->log("create HEADERS: " . print_r($headers, true), 'DEBUG', 'NimbblOrder');
-            NimbblLogger::getInstance()->log("create BODY: " . $requestBody, 'DEBUG', 'NimbblOrder');
+            //NimbblLogger::getInstance()->log("create HEADERS: " . print_r($headers, true), 'DEBUG', 'NimbblOrder');
+            //NimbblLogger::getInstance()->log("create BODY: " . $requestBody, 'DEBUG', 'NimbblOrder');
             
             // Only make one API request and log the response
             $hooks = new \Requests_Hooks();
@@ -68,8 +68,8 @@ class NimbblOrder extends NimbblEntity implements JsonSerializable
             $rawResponse = \Requests::request($fullUrl, $headers, $requestBody, 'POST', $options);
             
             NimbblLogger::getInstance()->log("create RESPONSE - status: {$rawResponse->status_code}", 'DEBUG', 'NimbblOrder');
-            NimbblLogger::getInstance()->log("create response HEADERS: " . print_r($rawResponse->headers, true), 'DEBUG', 'NimbblOrder');
-            NimbblLogger::getInstance()->log("create response BODY: " . $rawResponse->body, 'DEBUG', 'NimbblOrder');
+            //NimbblLogger::getInstance()->log("create response HEADERS: " . print_r($rawResponse->headers, true), 'DEBUG', 'NimbblOrder');
+            //NimbblLogger::getInstance()->log("create response BODY: " . $rawResponse->body, 'DEBUG', 'NimbblOrder');
             
             // Log the raw JSON response for debugging
             NimbblLogger::getInstance()->log("create RAW JSON RESPONSE: " . $rawResponse->body, 'DEBUG', 'NimbblOrder');
@@ -98,7 +98,7 @@ class NimbblOrder extends NimbblEntity implements JsonSerializable
                 NimbblLogger::getInstance()->log("create ERROR: Unexpected API response: " . print_r($createdEntity, true), 'ERROR', 'NimbblOrder');
             }
             
-            NimbblLogger::getInstance()->log("create END - result: " . print_r($newCreatedEntity, true), 'DEBUG', 'NimbblOrder');
+            //NimbblLogger::getInstance()->log("create END - result: " . print_r($newCreatedEntity, true), 'DEBUG', 'NimbblOrder');
             return $newCreatedEntity;
         } catch (\Exception $e) {
             NimbblLogger::getInstance()->log("create ERROR: " . $e->getMessage() . PHP_EOL . $e->getTraceAsString(), 'ERROR', 'NimbblOrder');

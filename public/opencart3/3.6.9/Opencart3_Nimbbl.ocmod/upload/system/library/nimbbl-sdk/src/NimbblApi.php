@@ -68,20 +68,12 @@ class NimbblApi
 
     public static function getBaseUrl()
     {
-        NimbblLogger::getInstance()->log("getBaseUrl START");
         $url = self::$baseUrl;
-        // Set default if not set or empty
-        if (empty($url)) {
-            $url = 'https://api.nimbbl.tech/api/';
-            self::$baseUrl = $url;
-            NimbblLogger::getInstance()->log("getBaseUrl - Set default URL: {$url}");
-        }
         NimbblLogger::getInstance()->log("getBaseUrl END - returning: {$url}");
         return $url;
     }
 
     public static function getAPIVersion() {
-        NimbblLogger::getInstance()->log("getAPIVersion START");
         $ver = self::$apiVersion;
         NimbblLogger::getInstance()->log("getAPIVersion END - returning: {$ver}");
         return $ver;
@@ -89,7 +81,6 @@ class NimbblApi
 
     public static function getKey()
     {
-        NimbblLogger::getInstance()->log("getKey START");
         $key = self::$key;
         $maskedKey = $key ? substr($key, 0, 4) . str_repeat('*', max(0, strlen($key) - 8)) . substr($key, -4) : 'null';
         NimbblLogger::getInstance()->log("getKey END - returning masked key: {$maskedKey}");
@@ -98,7 +89,6 @@ class NimbblApi
 
     public static function getSecret()
     {
-        NimbblLogger::getInstance()->log("getSecret START");
         $secret = self::$secret;
         $maskedSecret = $secret ? substr($secret, 0, 4) . str_repeat('*', max(0, strlen($secret) - 8)) . substr($secret, -4) : 'null';
         NimbblLogger::getInstance()->log("getSecret END - returning masked secret: {$maskedSecret}");
@@ -126,16 +116,14 @@ class NimbblApi
     }
 
     public static function setMerchantId($merchantId){
-        NimbblLogger::getInstance()->log("setMerchantId START - merchantId: {$merchantId}");
         self::$merchantId = $merchantId;
-        NimbblLogger::getInstance()->log("setMerchantId END");
+        NimbblLogger::getInstance()->log("setMerchantId END - subMerchantId: {$merchantId}");
         return true;
     }
 
     public static function getMerchantId(){
-        NimbblLogger::getInstance()->log("getMerchantId START");
         $id = self::$merchantId;
-        NimbblLogger::getInstance()->log("getMerchantId END - returning: " . ($id ?? 'null'));
+        NimbblLogger::getInstance()->log("getMerchantId END - returning subMerchantId: " . ($id ?? 'null'));
         return $id;
     }
 }
