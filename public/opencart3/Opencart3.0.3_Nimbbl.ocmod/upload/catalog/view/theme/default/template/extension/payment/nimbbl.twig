@@ -1,0 +1,18 @@
+{% if error is not empty %}
+    {% if error is iterable %}
+        {% for item in error %}
+            {{ item }}<br>
+        {% endfor %}
+    {% else %}
+        {{ error }}
+    {% endif %}
+{% elseif data is not empty %}
+    {% if data is iterable %}
+        {% for item in data %}
+            {{ item }}<br>
+        {% endfor %}
+    {% else %}
+        {{ data }}
+    {% endif %}
+{% endif %}
+	
