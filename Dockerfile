@@ -34,4 +34,5 @@ EXPOSE 80
 # ----------------------------------------------------
 # UPDATED: Use php-fpm -F (foreground) and run nginx in foreground
 #           Previously php-fpm -D would daemonize and Nginx would fail to connect
-CMD ["sh", "-c", "php-fpm -F & nginx -g 'daemon off;' & wait"]
+# Start PHP-FPM in daemon mode, then Nginx in foreground
+CMD ["sh", "-c", "php-fpm -D && nginx -g 'daemon off;'"]
