@@ -27,12 +27,14 @@ COPY upload/php.ini /usr/local/etc/php/conf.d/opencart.ini
 # Remove default nginx site
 RUN rm -f /etc/nginx/sites-enabled/default
 
+# ✅ Create Nginx log directory so Nginx can write logs
+RUN mkdir -p /var/log/nimbbl_logs && \
+    chown -R www-data:www-data /var/log/nimbbl_logs
+
 # Expose port 80 for Nginx
 EXPOSE 80
 
 # Start PHP-FPM in foreground and Nginx in foreground
 # ----------------------------------------------------
-# UPDATED: Use php-fpm -F (foreground) and run nginx in foreground
-#           Previously php-fpm -D would daemonize and Nginx would fail to connect
-# Start PHP-FPM in daemon mode, then Nginx in foreground
+# UPDATED: Use php-fpm -D (daemon) and run nginx in foreground
 CMD ["sh", "-c", "php-fpm -D && nginx -g 'daemon off;'"]
