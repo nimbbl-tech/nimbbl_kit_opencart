@@ -6,8 +6,9 @@ FROM public.ecr.aws/x2m1j4h8/payment-base:php-8.2-fpm
 RUN docker-php-ext-install mysqli && docker-php-ext-enable mysqli && \
     apt-get update && apt-get install -y \
     nginx \
-    procps net-tools \   # <-- ADDED: tools for debugging (ps, netstat)
-    && rm -rf /var/lib/apt/lists/*
+    procps \
+    net-tools && \
+    rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /var/www/html
@@ -33,4 +34,4 @@ EXPOSE 80
 # ----------------------------------------------------
 # UPDATED: Use php-fpm -F (foreground) and run nginx in foreground
 #           Previously php-fpm -D would daemonize and Nginx would fail to connect
-CMD ["sh", "-c", "php-fpm -F & nginx -g 'daemon off;'"]
+CMD ["sh", "-c", "php-fpm -F & nginx -g 'daemon off;' & wait"]
