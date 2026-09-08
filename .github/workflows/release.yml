@@ -1,0 +1,82 @@
+name: Release
+
+# Trigger: push a version tag like v4.0.0 or v4.1.0-alpha
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-release:
+    name: Build plugin zip + publish GitHub Release
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write   # needed to create GitHub Release
+
+    steps:
+      # ── Checkout ─────────────────────────────────────────────────────────────
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ── Parse version from tag ────────────────────────────────────────────────
+      - name: Parse version
+        id: version
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      # ── PHP + Composer (only if SDK is not bundled) ───────────────────────────
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: composer:v2
+
+      - name: Install Composer dependencies
+        working-directory: src/opencart4
+        run: |
+          BUNDLED=upload/extension/nimbbl/system/library/nimbbl-sdk/autoload.php
+          if [ -f "$BUNDLED" ]; then
+            echo "Bundled SDK found — skipping Composer install"
+          else
+            composer install --no-dev --optimize-autoloader --no-interaction
+          fi
+
+      # ── Build zip ─────────────────────────────────────────────────────────────
+      - name: Build zip
+        run: |
+          mkdir -p dist
+          bash src/build.sh "${{ steps.version.outputs.VERSION }}"
+
+      # ── Upload zip to AWS ECR (for store Docker build) ────────────────────────
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region:            ap-south-1
+
+      - name: Upload plugin zip to S3
+        run: |
+          aws s3 cp \
+            dist/nimbbl-opencart4-${{ steps.version.outputs.VERSION }}.zip \
+            s3://nimbbl-releases/opencart/nimbbl-opencart4-${{ steps.version.outputs.VERSION }}.zip \
+            --acl private
+
+      # ── GitHub Release ────────────────────────────────────────────────────────
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "Nimbbl OpenCart 4 v${{ steps.version.outputs.VERSION }}"
+          draft: false
+          prerelease: ${{ contains(github.ref_name, 'alpha') || contains(github.ref_name, 'beta') || contains(github.ref_name, 'rc') }}
+          files: dist/nimbbl-opencart4-${{ steps.version.outputs.VERSION }}.zip
+          body: |
+            ## Nimbbl Payment Gateway for OpenCart 4 — v${{ steps.version.outputs.VERSION }}
+
+            ### Installation
+            1. OpenCart Admin → Extensions → Installer → Upload `.zip`
+            2. Extensions → Payments → Nimbbl → Install → Edit
+            3. Enter Test/Live API credentials and save.
+
+            ### Changelog
+            See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details.

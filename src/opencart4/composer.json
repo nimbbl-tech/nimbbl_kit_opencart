@@ -1,0 +1,15 @@
+{
+    "name": "nimbbl/nimbbl-opencart4",
+    "description": "Nimbbl Payment Gateway for OpenCart 4",
+    "homepage": "https://nimbbl.biz",
+    "version": "4.0.0",
+    "type": "opencart-extension",
+    "license": "MIT",
+    "require": {
+        "php": ">=8.0",
+        "nimbbl/nimbbl-sdk": "*"
+    },
+    "config": {
+        "vendor-dir": "upload/extension/nimbbl/system/library/vendor"
+    }
+}

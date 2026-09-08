@@ -1,0 +1,41 @@
+{#
+  Payment method description shown on the checkout page (before order is placed).
+  `index()` returns this as a string embedded in the checkout payment step.
+  OC4: this view must include the Confirm Order button (confirm.twig renders {{ payment }} in place of the button).
+#}
+<div class="nimbbl-payment-method" style="margin-bottom:12px;">
+  <img src="{{ logo_url }}" alt="Nimbbl" width="58" height="24" style="vertical-align:middle; margin-right:8px;">
+  <span>{{ text_title }}</span>
+</div>
+<div class="text-end">
+  <button type="button" id="button-confirm" class="btn btn-primary">{{ button_confirm }}</button>
+</div>
+<script type="text/javascript"><!--
+$('#button-confirm').on('click', function() {
+    var element = this;
+
+    $.ajax({
+        url: 'index.php?route=extension/nimbbl/payment/nimbbl.confirm&language={{ language }}',
+        type: 'post',
+        dataType: 'json',
+        beforeSend: function() {
+            $(element).prop('disabled', true);
+        },
+        complete: function() {
+            $(element).prop('disabled', false);
+        },
+        success: function(json) {
+            if (json['error']) {
+                $('#alert').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa-solid fa-circle-exclamation"></i> ' + json['error'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+            }
+
+            if (json['redirect']) {
+                location = json['redirect'];
+            }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            console.log(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+        }
+    });
+});
+//--></script>

@@ -1,0 +1,59 @@
+{{ header }}
+
+<div class="container">
+  <div class="row" style="margin-top: 40px; margin-bottom: 40px; text-align: center;">
+    <div class="col-sm-12">
+      <h3>{{ loading_text }}</h3>
+      <p>{{ redirect_msg }}</p>
+      <div style="margin-top: 20px;">
+        <img src="{{ catalog }}extension/nimbbl/admin/view/image/payment/nimbbllogo.png"
+             alt="Nimbbl" width="116" height="48" style="opacity:0.85;">
+      </div>
+      <div style="margin-top: 30px;">
+        <div class="loader" style="
+          border: 4px solid #f3f3f3;
+          border-top: 4px solid #E94A3A;
+          border-radius: 50%;
+          width: 36px;
+          height: 36px;
+          animation: spin 0.8s linear infinite;
+          display: inline-block;
+        "></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+</style>
+
+{#
+  Sonic redirect-mode integration.
+  nimbbl_token  — short-lived JWT from orders().createOrder()
+  api_host      — e.g. https://api.nimbbl.tech
+  checkout_host — e.g. https://sonic.nimbbl.tech/
+  callback_url  — OC callback route (Sonic appends its signed response here)
+#}
+<script>
+(function () {
+  var config = {
+    token:        {{ nimbbl_token | json_encode | raw }},
+    apiHost:      {{ api_host     | json_encode | raw }},
+    checkoutHost: {{ checkout_host | json_encode | raw }},
+    callbackUrl:  {{ callback_url  | json_encode | raw }},
+  };
+
+  // Build Sonic redirect URL
+  var params = new URLSearchParams({
+    token:        config.token,
+    redirect_url: config.callbackUrl,
+    mode:         'redirect',
+  });
+
+  var sonicUrl = config.checkoutHost + '?' + params.toString();
+  window.location.replace(sonicUrl);
+})();
+</script>
+
+{{ footer }}

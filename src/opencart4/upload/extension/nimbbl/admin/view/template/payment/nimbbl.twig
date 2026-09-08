@@ -1,0 +1,267 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="float-end">
+        <button type="submit" form="form-payment-nimbbl" class="btn btn-primary">
+          <i class="fa-solid fa-floppy-disk"></i> {{ button_save }}
+        </button>
+        <a href="{{ cancel }}" class="btn btn-light">
+          <i class="fa-solid fa-reply"></i> {{ button_cancel }}
+        </a>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ol class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+          <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+    {% if error_warning %}
+      <div class="alert alert-danger alert-dismissible">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        {{ error_warning }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endif %}
+
+    <div class="card">
+      <div class="card-header">
+        <i class="fa-solid fa-pencil"></i> {{ text_edit }}
+      </div>
+      <div class="card-body">
+        <form action="{{ action }}" method="post" enctype="multipart/form-data"
+              id="form-payment-nimbbl" class="form-horizontal">
+
+          {# ── Tabs ─────────────────────────────────────────────────────────── #}
+          <ul class="nav nav-tabs mb-3" id="nimbbl-tabs">
+            <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tab-general">{{ tab_general }}</a></li>
+            <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-api-keys">{{ tab_api_keys }}</a></li>
+            <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-advanced">{{ tab_advanced }}</a></li>
+            <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-webhooks">{{ tab_webhooks }}</a></li>
+          </ul>
+
+          <div class="tab-content">
+
+            {# ── General ───────────────────────────────────────────────────── #}
+            <div class="tab-pane active" id="tab-general">
+
+              <div class="row mb-3">
+                <label class="col-sm-2 col-form-label">{{ entry_status }}</label>
+                <div class="col-sm-10">
+                  <select name="payment_nimbbl_status" class="form-select">
+                    <option value="1" {% if payment_nimbbl_status == '1' %}selected{% endif %}>{{ text_enabled }}</option>
+                    <option value="0" {% if payment_nimbbl_status != '1' %}selected{% endif %}>{{ text_disabled }}</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="row mb-3">
+                <label class="col-sm-2 col-form-label">{{ entry_mode }}</label>
+                <div class="col-sm-10">
+                  <select name="payment_nimbbl_mode" id="nimbbl-mode" class="form-select">
+                    <option value="test" {% if payment_nimbbl_mode == 'test' or payment_nimbbl_mode == '' %}selected{% endif %}>{{ text_test }}</option>
+                    <option value="live" {% if payment_nimbbl_mode == 'live' %}selected{% endif %}>{{ text_live }}</option>
+                  </select>
+                  <div class="form-text">{{ help_mode }}</div>
+                </div>
+              </div>
+
+              <div class="row mb-3">
+                <label class="col-sm-2 col-form-label">{{ entry_geo_zone }}</label>
+                <div class="col-sm-10">
+                  <select name="payment_nimbbl_geo_zone_id" class="form-select">
+                    <option value="0">{{ text_all_zones }}</option>
+                    {% for geo_zone in geo_zones %}
+                      <option value="{{ geo_zone.geo_zone_id }}"
+                        {% if payment_nimbbl_geo_zone_id == geo_zone.geo_zone_id %}selected{% endif %}>
+                        {{ geo_zone.name }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+
+              <div class="row mb-3">
+                <label class="col-sm-2 col-form-label">{{ entry_total }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="payment_nimbbl_total" class="form-control"
+                         value="{{ payment_nimbbl_total }}">
+                  <div class="form-text">{{ help_total }}</div>
+                </div>
+              </div>
+
+              <div class="row mb-3">
+                <label class="col-sm-2 col-form-label">{{ entry_sort_order }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="payment_nimbbl_sort_order" class="form-control"
+                         value="{{ payment_nimbbl_sort_order }}">
+                </div>
+              </div>
+
+            </div>{# /tab-general #}
+
+            {# ── API Keys ──────────────────────────────────────────────────── #}
+            <div class="tab-pane" id="tab-api-keys">
+
+              {# Test keys #}
+              <fieldset class="mb-4" id="nimbbl-test-keys">
+                <legend class="h6">{{ text_test }} Keys</legend>
+
+                <div class="row mb-3">
+                  <label class="col-sm-3 col-form-label">{{ entry_test_access_key }}</label>
+                  <div class="col-sm-9">
+                    <input type="text" name="payment_nimbbl_test_access_key" class="form-control"
+                           value="{{ payment_nimbbl_test_access_key }}" autocomplete="off">
+                    {% if error_test_access_key %}
+                      <div class="text-danger mt-1">{{ error_test_access_key }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                  <label class="col-sm-3 col-form-label">{{ entry_test_secret_key }}</label>
+                  <div class="col-sm-9">
+                    <input type="password" name="payment_nimbbl_test_secret_key" class="form-control"
+                           value="{{ payment_nimbbl_test_secret_key }}" autocomplete="off">
+                    {% if error_test_secret_key %}
+                      <div class="text-danger mt-1">{{ error_test_secret_key }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+              </fieldset>
+
+              {# Live keys #}
+              <fieldset id="nimbbl-live-keys">
+                <legend class="h6">{{ text_live }} Keys</legend>
+
+                <div class="row mb-3">
+                  <label class="col-sm-3 col-form-label">{{ entry_live_access_key }}</label>
+                  <div class="col-sm-9">
+                    <input type="text" name="payment_nimbbl_live_access_key" class="form-control"
+                           value="{{ payment_nimbbl_live_access_key }}" autocomplete="off">
+                    {% if error_live_access_key %}
+                      <div class="text-danger mt-1">{{ error_live_access_key }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                  <label class="col-sm-3 col-form-label">{{ entry_live_secret_key }}</label>
+                  <div class="col-sm-9">
+                    <input type="password" name="payment_nimbbl_live_secret_key" class="form-control"
+                           value="{{ payment_nimbbl_live_secret_key }}" autocomplete="off">
+                    {% if error_live_secret_key %}
+                      <div class="text-danger mt-1">{{ error_live_secret_key }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+              </fieldset>
+
+              <div class="row mb-3 mt-4">
+                <label class="col-sm-3 col-form-label">{{ entry_api_url }}</label>
+                <div class="col-sm-9">
+                  <input type="url" name="payment_nimbbl_api_url" class="form-control"
+                         value="{{ payment_nimbbl_api_url }}">
+                  <div class="form-text">{{ help_api_url }}</div>
+                </div>
+              </div>
+
+              <div class="row mb-3">
+                <label class="col-sm-3 col-form-label">{{ entry_checkout_host }}</label>
+                <div class="col-sm-9">
+                  <input type="url" name="payment_nimbbl_checkout_host" class="form-control"
+                         value="{{ payment_nimbbl_checkout_host }}">
+                  <div class="form-text">{{ help_checkout_host }}</div>
+                </div>
+              </div>
+
+            </div>{# /tab-api-keys #}
+
+            {# ── Advanced ──────────────────────────────────────────────────── #}
+            <div class="tab-pane" id="tab-advanced">
+
+              <div class="row mb-3">
+                <label class="col-sm-2 col-form-label">{{ entry_order_status }}</label>
+                <div class="col-sm-10">
+                  <select name="payment_nimbbl_order_status_id" class="form-select">
+                    {% for order_status in order_statuses %}
+                      <option value="{{ order_status.order_status_id }}"
+                        {% if payment_nimbbl_order_status_id == order_status.order_status_id %}selected{% endif %}>
+                        {{ order_status.name }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+
+              <div class="row mb-3">
+                <label class="col-sm-2 col-form-label">{{ entry_order_fail_status }}</label>
+                <div class="col-sm-10">
+                  <select name="payment_nimbbl_order_fail_status_id" class="form-select">
+                    {% for order_status in order_statuses %}
+                      <option value="{{ order_status.order_status_id }}"
+                        {% if payment_nimbbl_order_fail_status_id == order_status.order_status_id %}selected{% endif %}>
+                        {{ order_status.name }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+
+              <div class="row mb-3">
+                <label class="col-sm-2 col-form-label">{{ entry_debug }}</label>
+                <div class="col-sm-10">
+                  <select name="payment_nimbbl_debug" class="form-select">
+                    <option value="1" {% if payment_nimbbl_debug == '1' %}selected{% endif %}>{{ text_yes }}</option>
+                    <option value="0" {% if payment_nimbbl_debug != '1' %}selected{% endif %}>{{ text_no }}</option>
+                  </select>
+                  <div class="form-text">{{ help_debug }}</div>
+                </div>
+              </div>
+
+              <div class="row mb-3">
+                <label class="col-sm-2 col-form-label">{{ entry_encrypt_payload }}</label>
+                <div class="col-sm-10">
+                  <select name="payment_nimbbl_encrypt_payload" class="form-select">
+                    <option value="0" {% if payment_nimbbl_encrypt_payload != '1' %}selected{% endif %}>{{ text_no }}</option>
+                    <option value="1" {% if payment_nimbbl_encrypt_payload == '1' %}selected{% endif %}>{{ text_yes }}</option>
+                  </select>
+                  <div class="form-text">{{ help_encrypt_payload }}</div>
+                </div>
+              </div>
+
+            </div>{# /tab-advanced #}
+
+            {# ── Webhooks ──────────────────────────────────────────────────── #}
+            <div class="tab-pane" id="tab-webhooks">
+
+              <div class="row mb-3">
+                <label class="col-sm-2 col-form-label">{{ entry_webhook_url }}</label>
+                <div class="col-sm-10">
+                  <div class="input-group">
+                    <input type="text" id="nimbbl-webhook-url" class="form-control"
+                           value="{{ webhook_url }}" readonly>
+                    <button type="button" class="btn btn-outline-secondary"
+                            onclick="navigator.clipboard.writeText(document.getElementById('nimbbl-webhook-url').value)
+                                     .then(function(){ alert('Copied!'); })">
+                      <i class="fa-solid fa-copy"></i>
+                    </button>
+                  </div>
+                  <div class="form-text">{{ help_webhook_url }}</div>
+                </div>
+              </div>
+
+            </div>{# /tab-webhooks #}
+
+          </div>{# /tab-content #}
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{{ footer }}
