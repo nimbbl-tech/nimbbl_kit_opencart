@@ -1,0 +1,16 @@
+{
+    "name": "nimbbl/opencart-payment-plugin",
+    "description": "Nimbbl payment gateway plugin for OpenCart 4",
+    "type": "project",
+    "require-dev": {
+        "phpunit/phpunit": "^10.5 || ^11.0"
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    }
+}

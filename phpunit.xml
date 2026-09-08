@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+         displayDetailsOnTestsThatTriggerWarnings="true"
+         displayDetailsOnTestsThatTriggerNotices="true">
+
+    <testsuites>
+        <testsuite name="Nimbbl Plugin Unit Tests">
+            <directory>tests/Unit</directory>
+        </testsuite>
+    </testsuites>
+
+    <coverage>
+        <include>
+            <directory suffix=".php">src/extension/nimbbl</directory>
+        </include>
+    </coverage>
+
+    <php>
+        <!-- Suppress the static-flag reset issue — tests re-use the same process -->
+        <ini name="error_reporting" value="E_ALL &amp; ~E_DEPRECATED"/>
+    </php>
+</phpunit>
