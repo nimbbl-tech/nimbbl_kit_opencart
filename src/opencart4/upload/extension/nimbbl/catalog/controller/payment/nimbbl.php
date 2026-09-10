@@ -22,6 +22,29 @@ class Nimbbl extends \Opencart\System\Engine\Controller {
         }
     }
 
+    // ── URL helpers ──────────────────────────────────────────────────────────
+
+    /**
+     * Replace localhost / 127.0.0.1 in a URL with the machine's real IP so
+     * that Nimbbl's servers can reach the callback endpoint during local dev.
+     * On preprod/prod the HTTP_SERVER is already a public hostname, so this
+     * is a no-op there.
+     */
+    private function resolvePublicUrl(string $url): string {
+        if (strpos($url, 'localhost') === false && strpos($url, '127.0.0.1') === false) {
+            return $url;
+        }
+
+        // Try Docker Desktop host alias first (Mac / Windows)
+        $ip = gethostbyname('host.docker.internal');
+        if ($ip === 'host.docker.internal') {
+            // Fallback: container's own reported server address, then hostname lookup
+            $ip = $_SERVER['SERVER_ADDR'] ?? gethostbyname(gethostname());
+        }
+
+        return str_replace(['localhost', '127.0.0.1'], $ip, $url);
+    }
+
     // ── Nimbbl SDK ───────────────────────────────────────────────────────────
 
     private function loadVendor(): bool {
@@ -262,10 +285,12 @@ class Nimbbl extends \Opencart\System\Engine\Controller {
 
     private function buildOrderData(array $order_info, int $oc_order_id): array {
         $invoice_id   = $oc_order_id . '_' . time();
-        $callback_url = $this->url->link('extension/nimbbl/payment/nimbbl/callback', '', true);
+        $callback_url = $this->resolvePublicUrl(
+            $this->url->link('extension/nimbbl/payment/nimbbl.callback', '', true)
+        );
 
         $this->load->model('checkout/order');
-        $products = $this->model_checkout_order->getOrderProducts($oc_order_id);
+        $products = $this->model_checkout_order->getProducts($oc_order_id);
 
         $line_items   = [];
         $item_count   = 0;
@@ -311,7 +336,7 @@ class Nimbbl extends \Opencart\System\Engine\Controller {
             $data['shipping_address'] = $shipping;
         }
 
-        // User
+        // User — omit entirely if mobile_number is absent (API spec: key not sent, not null)
         $user = $this->buildUser($order_info);
         if (!empty($user)) {
             $data['user'] = $user;
@@ -363,15 +388,39 @@ class Nimbbl extends \Opencart\System\Engine\Controller {
         $email = trim($o['email']             ?? '');
         $first = trim($o['payment_firstname'] ?? '');
         $last  = trim($o['payment_lastname']  ?? '');
-        if ($phone === '' && $email === '' && $first === '' && $last === '') {
+
+        // mobile_number is required by Nimbbl — skip the user block entirely if absent
+        if ($phone === '') {
             return [];
         }
+
+        $country_code = $this->dialCode($o['payment_iso_code_2'] ?? 'IN');
+
         return [
+            'country_code'  => $country_code,
             'mobile_number' => $phone,
             'email'         => $email,
             'first_name'    => $first,
             'last_name'     => $last,
         ];
+    }
+
+    /**
+     * Map ISO 3166-1 alpha-2 country code → international dialing prefix.
+     * Covers the most common countries; defaults to +91 (India) for unknowns
+     * since Nimbbl is an India-first gateway.
+     */
+    private function dialCode(string $iso2): string {
+        static $map = [
+            'IN' => '+91',  'US' => '+1',   'GB' => '+44',  'AU' => '+61',
+            'CA' => '+1',   'AE' => '+971', 'SG' => '+65',  'NZ' => '+64',
+            'ZA' => '+27',  'MY' => '+60',  'PH' => '+63',  'BD' => '+880',
+            'PK' => '+92',  'LK' => '+94',  'NP' => '+977', 'MM' => '+95',
+            'DE' => '+49',  'FR' => '+33',  'NL' => '+31',  'IT' => '+39',
+            'ES' => '+34',  'JP' => '+81',  'KR' => '+82',  'CN' => '+86',
+            'HK' => '+852', 'ID' => '+62',  'TH' => '+66',  'VN' => '+84',
+        ];
+        return $map[strtoupper($iso2)] ?? '+91';
     }
 
     // ── Routes ───────────────────────────────────────────────────────────────
@@ -461,7 +510,7 @@ class Nimbbl extends \Opencart\System\Engine\Controller {
         $this->session->data['nimbbl_order_id']    = $nimbbl_order_id;
         $this->session->data['nimbbl_token']        = $nimbbl_token;
 
-        $json['redirect'] = $this->url->link('extension/nimbbl/payment/nimbbl/redirect', '', true);
+        $json['redirect'] = $this->url->link('extension/nimbbl/payment/nimbbl.redirect', '', true);
 
         $this->response->addHeader('Content-Type: application/json');
         $this->response->setOutput(json_encode($json));
@@ -485,7 +534,9 @@ class Nimbbl extends \Opencart\System\Engine\Controller {
         $parsed        = parse_url($api_url);
         $api_host      = ($parsed['scheme'] ?? 'https') . '://' . ($parsed['host'] ?? 'api.nimbbl.tech');
         $checkout_host = rtrim($this->config->get('payment_nimbbl_checkout_host') ?: 'https://sonic.nimbbl.tech', '/') . '/';
-        $callback_url  = $this->url->link('extension/nimbbl/payment/nimbbl/callback', '', true);
+        $callback_url  = $this->resolvePublicUrl(
+            $this->url->link('extension/nimbbl/payment/nimbbl.callback', '', true)
+        );
 
         $data['nimbbl_token']   = $nimbbl_token;
         $data['api_host']       = $api_host;

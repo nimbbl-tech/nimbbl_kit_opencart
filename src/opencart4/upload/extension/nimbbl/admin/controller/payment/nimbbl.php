@@ -112,7 +112,7 @@ class Nimbbl extends \Opencart\System\Engine\Controller {
         $data['geo_zones'] = $this->model_localisation_geo_zone->getGeoZones();
 
         // ── Webhook URL (read-only) ──────────────────────────────────────────
-        $data['webhook_url'] = \HTTP_CATALOG . 'index.php?route=extension/nimbbl/payment/nimbbl/webhook';
+        $data['webhook_url'] = \HTTP_CATALOG . 'index.php?route=extension/nimbbl/payment/nimbbl.webhook';
 
         // ── Layout ───────────────────────────────────────────────────────────
         $data['header']      = $this->load->controller('common/header');

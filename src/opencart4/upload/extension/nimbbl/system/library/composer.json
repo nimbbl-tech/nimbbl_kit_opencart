@@ -1,0 +1,10 @@
+{
+    "name": "nimbbl/nimbbl-opencart4-deps",
+    "description": "Runtime dependencies for Nimbbl OpenCart 4 plugin",
+    "require": {
+        "rmccue/requests": "^2.0"
+    },
+    "config": {
+        "vendor-dir": "vendor"
+    }
+}
