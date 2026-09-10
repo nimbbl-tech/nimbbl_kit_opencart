@@ -9,7 +9,7 @@ Nimbbl payment gateway plugin for **OpenCart 3** and **OpenCart 4**, enabling se
 | Platform   | Plugin version | Zip name                        |
 |------------|----------------|---------------------------------|
 | OpenCart 2 | v1.x           | `Opencart2_Nimbbl.ocmod.zip`   |
-| OpenCart 3 | v2.x – v3.x    | `Opencart3_Nimbbl.ocmod.zip`   |
+| OpenCart 3 | v2.x – v3.x    | `Opencart3[.x.x]_Nimbbl.ocmod.zip` |
 | OpenCart 4 | v4.x           | `Opencart4_Nimbbl.ocmod.zip`   |
 
 ---
@@ -137,4 +137,4 @@ public/
 
 ## Support
 
-For integration help, contact [support@nimbbl.biz](mailto:support@nimbbl.biz) or visit [nimbbl.biz](https://nimbbl.biz).
+For integration help, contact [help@nimbbl.biz](mailto:help@nimbbl.biz) or visit [nimbbl.biz](https://nimbbl.biz).

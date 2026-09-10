@@ -67,7 +67,9 @@ TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
 mkdir -p "$TMP_DIR/upload"
-cp "$SRC_DIR/install.json" "$TMP_DIR/"
+# Copy install.json and stamp the actual build version into it
+sed "s/\"version\": *\"[^\"]*\"/\"version\": \"${VERSION}\"/" \
+  "$SRC_DIR/install.json" > "$TMP_DIR/install.json"
 
 # Copy upload/ — excludes dev-only files
 rsync -a \
