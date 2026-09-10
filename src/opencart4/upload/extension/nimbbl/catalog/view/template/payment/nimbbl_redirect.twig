@@ -29,13 +29,13 @@
 </style>
 
 {#
-  Sonic redirect-mode integration.
+  Sonic SDK integration (redirect mode).
   nimbbl_token  — short-lived JWT from orders().createOrder()
   api_host      — e.g. https://api.nimbbl.tech
   checkout_host — e.g. https://sonic.nimbbl.tech/
-  callback_url  — OC callback route (Sonic appends its signed response here)
+  callback_url  — OC callback route; Sonic POSTs its signed response here
 #}
-<script>
+<script type="module">
 (function () {
   var config = {
     token:        {{ nimbbl_token | json_encode | raw }},
@@ -44,15 +44,21 @@
     callbackUrl:  {{ callback_url  | json_encode | raw }},
   };
 
-  // Build Sonic redirect URL
-  var params = new URLSearchParams({
-    token:        config.token,
-    redirect_url: config.callbackUrl,
-    mode:         'redirect',
-  });
-
-  var sonicUrl = config.checkoutHost + '?' + params.toString();
-  window.location.replace(sonicUrl);
+  import('https://cdn.jsdelivr.net/npm/nimbbl_sonic@latest')
+    .then(function (m) {
+      var Checkout = m.default;
+      var co = new Checkout({
+        token:        config.token,
+        apiHost:      config.apiHost,
+        checkoutHost: config.checkoutHost,
+      });
+      co.open({
+        callback_url: config.callbackUrl,
+      });
+    })
+    .catch(function (err) {
+      console.error('Nimbbl Sonic SDK failed to load', err);
+    });
 })();
 </script>
 
