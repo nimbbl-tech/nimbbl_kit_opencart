@@ -20,10 +20,13 @@ jobs:
         uses: actions/checkout@v4
 
       # ── Parse version + resolve zip name ─────────────────────────────────────
-      # Stable:    v4.0.0         → Opencart4_Nimbbl.ocmod.zip
-      # Alpha:     v4.1.0-alpha.1 → Opencart4_Nimbbl-alpha.1.ocmod.zip
-      # Beta:      v4.1.0-beta.2  → Opencart4_Nimbbl-beta.2.ocmod.zip
-      # RC:        v4.1.0-rc.1    → Opencart4_Nimbbl-rc.1.ocmod.zip
+      # OC4 Extension Installer uses the zip filename as the extension code,
+      # so the zip MUST be named nimbbl[-(prerelease)].ocmod.zip.
+      #
+      # Stable:  v4.0.0         → nimbbl.ocmod.zip
+      # Alpha:   v4.1.0-alpha.1 → nimbbl-alpha.1.ocmod.zip
+      # Beta:    v4.1.0-beta.2  → nimbbl-beta.2.ocmod.zip
+      # RC:      v4.1.0-rc.1    → nimbbl-rc.1.ocmod.zip
       - name: Parse version
         id: version
         run: |
@@ -32,28 +35,11 @@ jobs:
 
           PRERELEASE="${VERSION#*-}"
           if [[ "$PRERELEASE" == "$VERSION" ]]; then
-            ZIP_NAME="Opencart4_Nimbbl.ocmod.zip"
+            ZIP_NAME="nimbbl.ocmod.zip"
           else
-            ZIP_NAME="Opencart4_Nimbbl-${PRERELEASE}.ocmod.zip"
+            ZIP_NAME="nimbbl-${PRERELEASE}.ocmod.zip"
           fi
           echo "ZIP_NAME=$ZIP_NAME" >> "$GITHUB_OUTPUT"
-
-      # ── PHP + Composer (only if SDK is not bundled) ───────────────────────────
-      - name: Set up PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.1'
-          tools: composer:v2
-
-      - name: Install Composer dependencies
-        working-directory: src/opencart4
-        run: |
-          BUNDLED=upload/extension/nimbbl/system/library/nimbbl-sdk/autoload.php
-          if [ -f "$BUNDLED" ]; then
-            echo "Bundled SDK found — skipping Composer install"
-          else
-            composer install --no-dev --optimize-autoloader --no-interaction
-          fi
 
       # ── Build zip ─────────────────────────────────────────────────────────────
       - name: Build zip
@@ -71,8 +57,8 @@ jobs:
             ## Nimbbl Payment Gateway for OpenCart 4 — v${{ steps.version.outputs.VERSION }}
 
             ### Installation
-            1. OpenCart Admin → Extensions → Installer → Upload `${{ steps.version.outputs.ZIP_NAME }}`
-            2. Extensions → Payments → Nimbbl → Install → Edit
+            1. OpenCart Admin → **Extensions → Installer** → Upload `${{ steps.version.outputs.ZIP_NAME }}`
+            2. **Extensions → Payments → Nimbbl** → Install → Edit
             3. Enter Test/Live API credentials and save.
 
             ### Changelog

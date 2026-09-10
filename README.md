@@ -10,7 +10,7 @@ Nimbbl payment gateway plugin for **OpenCart 3** and **OpenCart 4**, enabling se
 |------------|----------------|---------------------------------|
 | OpenCart 2 | v1.x           | `Opencart2_Nimbbl.ocmod.zip`   |
 | OpenCart 3 | v2.x – v3.x    | `Opencart3[.x.x]_Nimbbl.ocmod.zip` |
-| OpenCart 4 | v4.x           | `Opencart4_Nimbbl.ocmod.zip`   |
+| OpenCart 4 | v4.x           | `nimbbl.ocmod.zip`             |
 
 ---
 
@@ -28,15 +28,18 @@ public/
     v3.0.3/  Opencart3.0.3_Nimbbl.ocmod.zip
     v3.0.4/  Opencart3.0.4_Nimbbl.ocmod.zip
   opencart4/
-    v4.0.0/  Opencart4_Nimbbl.ocmod.zip
+    v4.0.0/  nimbbl.ocmod.zip
 ```
 
-Pre-release zips follow the pattern `Opencart4_Nimbbl-{suffix}.ocmod.zip`:
+> **Why `nimbbl.ocmod.zip`?** OC4's Extension Installer derives the extension code
+> from the zip filename (`basename(.ocmod.zip)`). The code must be `nimbbl` for the
+> plugin's routing and namespace resolution to work. Pre-release zips append the
+> suffix so the stable slot is always `nimbbl.ocmod.zip`:
 
 ```
-v4.1.0-alpha.1/  Opencart4_Nimbbl-alpha.1.ocmod.zip
-v4.1.0-beta.2/   Opencart4_Nimbbl-beta.2.ocmod.zip
-v4.1.0-rc.1/     Opencart4_Nimbbl-rc.1.ocmod.zip
+v4.1.0-alpha.1/  nimbbl-alpha.1.ocmod.zip
+v4.1.0-beta.2/   nimbbl-beta.2.ocmod.zip
+v4.1.0-rc.1/     nimbbl-rc.1.ocmod.zip
 ```
 
 ---

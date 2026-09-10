@@ -1,22 +1,30 @@
 #!/usr/bin/env bash
-# build.sh — Build Opencart4_Nimbbl[-(prerelease)].ocmod.zip for distribution
+# build.sh — Build nimbbl.ocmod.zip for OC4 Extension Installer distribution
+#
+# OC4 Extension Installer derives the extension code from the zip filename
+# (basename without .ocmod.zip) and extracts ALL zip contents under
+# extension/{code}/. Therefore:
+#   - Zip must be named nimbbl.ocmod.zip  (code = nimbbl)
+#   - Files inside must be at raw paths:  admin/, catalog/, system/
+#     (no install.json, no upload/ wrapper)
+#   - Installer places them at:           extension/nimbbl/admin/  etc.
+#
+# Output per version:
+#   Stable:  public/opencart4/v4.0.0/nimbbl.ocmod.zip
+#   Alpha:   public/opencart4/v4.1.0-alpha.1/nimbbl-alpha.1.ocmod.zip
+#   Beta:    public/opencart4/v4.1.0-beta.2/nimbbl-beta.2.ocmod.zip
+#   RC:      public/opencart4/v4.1.0-rc.1/nimbbl-rc.1.ocmod.zip
 #
 # Usage:
 #   ./src/build.sh [VERSION]
+#   VERSION defaults to install.json version if omitted.
 #
-# VERSION examples:
-#   4.0.0            → public/opencart4/v4.0.0/Opencart4_Nimbbl.ocmod.zip
-#   4.1.0-alpha.1    → public/opencart4/v4.1.0-alpha.1/Opencart4_Nimbbl-alpha.1.ocmod.zip
-#   4.1.0-beta.2     → public/opencart4/v4.1.0-beta.2/Opencart4_Nimbbl-beta.2.ocmod.zip
-#   4.1.0-rc.1       → public/opencart4/v4.1.0-rc.1/Opencart4_Nimbbl-rc.1.ocmod.zip
-#
-# If VERSION is omitted it reads from install.json.
-#
-# Requirements: composer, zip, jq (optional — used to parse install.json)
+# Requirements: zip, rsync, jq (optional)
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SRC_DIR="$SCRIPT_DIR/opencart4"
+UPLOAD_DIR="$SRC_DIR/upload/extension/nimbbl"
 
 # ── Version ──────────────────────────────────────────────────────────────────
 if [[ -n "${1:-}" ]]; then
@@ -32,50 +40,34 @@ if [[ -z "$VERSION" ]]; then
   exit 1
 fi
 
-# ── Resolve zip name (stable vs pre-release) ─────────────────────────────────
-# VERSION=4.1.0          → ZIP_NAME=Opencart4_Nimbbl.ocmod.zip
-# VERSION=4.1.0-alpha.1  → ZIP_NAME=Opencart4_Nimbbl-alpha.1.ocmod.zip
+# ── Zip filename: stable = nimbbl.ocmod.zip, pre-release = nimbbl-{suffix}.ocmod.zip
 PRERELEASE="${VERSION#*-}"
 if [[ "$PRERELEASE" == "$VERSION" ]]; then
-  # No pre-release suffix
-  ZIP_NAME="Opencart4_Nimbbl.ocmod.zip"
+  ZIP_NAME="nimbbl.ocmod.zip"
 else
-  ZIP_NAME="Opencart4_Nimbbl-${PRERELEASE}.ocmod.zip"
+  ZIP_NAME="nimbbl-${PRERELEASE}.ocmod.zip"
 fi
 
 PUBLIC_DIR="$SCRIPT_DIR/../public/opencart4/v${VERSION}"
 ZIP_PATH="$PUBLIC_DIR/$ZIP_NAME"
 
 echo "==> Nimbbl OpenCart 4 Plugin — v${VERSION}"
-echo "    src    : $SRC_DIR"
+echo "    src    : $UPLOAD_DIR"
 echo "    output : $ZIP_PATH"
+echo "    note   : OC4 installer extracts to extension/nimbbl/ from filename"
 
 mkdir -p "$PUBLIC_DIR"
 
-# ── Composer install (optional) ──────────────────────────────────────────────
-# Runs only if the nimbbl SDK is NOT already bundled in system/library/nimbbl-sdk/.
-BUNDLED_AUTOLOAD="$SRC_DIR/upload/extension/nimbbl/system/library/nimbbl-sdk/autoload.php"
-if [[ ! -f "$BUNDLED_AUTOLOAD" ]]; then
-  echo "==> Installing Composer dependencies..."
-  (cd "$SRC_DIR" && composer install --no-dev --optimize-autoloader --no-interaction)
-else
-  echo "==> Bundled SDK found — skipping Composer install"
-fi
-
-# ── Assemble zip ─────────────────────────────────────────────────────────────
+# ── Assemble zip (raw paths — no install.json, no upload/ wrapper) ────────────
+# Files inside zip: admin/, catalog/, system/
+# OC4 Extension Installer prepends code (nimbbl) → extension/nimbbl/admin/ etc.
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
-mkdir -p "$TMP_DIR/upload"
-# Copy install.json and stamp the actual build version into it
-sed "s/\"version\": *\"[^\"]*\"/\"version\": \"${VERSION}\"/" \
-  "$SRC_DIR/install.json" > "$TMP_DIR/install.json"
-
-# Copy upload/ — excludes dev-only files
 rsync -a \
   --exclude='.DS_Store' \
   --exclude='*.orig' \
-  "$SRC_DIR/upload/" "$TMP_DIR/upload/"
+  "$UPLOAD_DIR/" "$TMP_DIR/"
 
 echo "==> Creating $ZIP_PATH..."
 (cd "$TMP_DIR" && zip -r "$ZIP_PATH" . -x "*.DS_Store")
