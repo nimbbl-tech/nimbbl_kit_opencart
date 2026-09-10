@@ -1,6 +1,6 @@
 name: Release
 
-# Trigger: push a version tag like v4.0.0 or v4.1.0-alpha
+# Trigger: push a version tag like v4.0.0, v4.1.0-alpha.1, v4.1.0-beta.2, v4.1.0-rc.1
 on:
   push:
     tags:
@@ -19,10 +19,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # ── Parse version from tag ────────────────────────────────────────────────
+      # ── Parse version + resolve zip name ─────────────────────────────────────
+      # Stable:    v4.0.0         → Opencart4_Nimbbl.ocmod.zip
+      # Alpha:     v4.1.0-alpha.1 → Opencart4_Nimbbl-alpha.1.ocmod.zip
+      # Beta:      v4.1.0-beta.2  → Opencart4_Nimbbl-beta.2.ocmod.zip
+      # RC:        v4.1.0-rc.1    → Opencart4_Nimbbl-rc.1.ocmod.zip
       - name: Parse version
         id: version
-        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+
+          PRERELEASE="${VERSION#*-}"
+          if [[ "$PRERELEASE" == "$VERSION" ]]; then
+            ZIP_NAME="Opencart4_Nimbbl.ocmod.zip"
+          else
+            ZIP_NAME="Opencart4_Nimbbl-${PRERELEASE}.ocmod.zip"
+          fi
+          echo "ZIP_NAME=$ZIP_NAME" >> "$GITHUB_OUTPUT"
 
       # ── PHP + Composer (only if SDK is not bundled) ───────────────────────────
       - name: Set up PHP
@@ -43,24 +57,7 @@ jobs:
 
       # ── Build zip ─────────────────────────────────────────────────────────────
       - name: Build zip
-        run: |
-          mkdir -p dist
-          bash src/build.sh "${{ steps.version.outputs.VERSION }}"
-
-      # ── Upload zip to AWS ECR (for store Docker build) ────────────────────────
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region:            ap-south-1
-
-      - name: Upload plugin zip to S3
-        run: |
-          aws s3 cp \
-            dist/nimbbl-opencart4-${{ steps.version.outputs.VERSION }}.zip \
-            s3://nimbbl-releases/opencart/nimbbl-opencart4-${{ steps.version.outputs.VERSION }}.zip \
-            --acl private
+        run: bash src/build.sh "${{ steps.version.outputs.VERSION }}"
 
       # ── GitHub Release ────────────────────────────────────────────────────────
       - name: Create GitHub Release
@@ -69,12 +66,12 @@ jobs:
           name: "Nimbbl OpenCart 4 v${{ steps.version.outputs.VERSION }}"
           draft: false
           prerelease: ${{ contains(github.ref_name, 'alpha') || contains(github.ref_name, 'beta') || contains(github.ref_name, 'rc') }}
-          files: dist/nimbbl-opencart4-${{ steps.version.outputs.VERSION }}.zip
+          files: public/opencart4/v${{ steps.version.outputs.VERSION }}/${{ steps.version.outputs.ZIP_NAME }}
           body: |
             ## Nimbbl Payment Gateway for OpenCart 4 — v${{ steps.version.outputs.VERSION }}
 
             ### Installation
-            1. OpenCart Admin → Extensions → Installer → Upload `.zip`
+            1. OpenCart Admin → Extensions → Installer → Upload `${{ steps.version.outputs.ZIP_NAME }}`
             2. Extensions → Payments → Nimbbl → Install → Edit
             3. Enter Test/Live API credentials and save.
 

@@ -1,18 +1,22 @@
 #!/usr/bin/env bash
-# build.sh — Build nimbbl-opencart4-{VERSION}.zip for distribution
+# build.sh — Build Opencart4_Nimbbl[-(prerelease)].ocmod.zip for distribution
 #
 # Usage:
 #   ./src/build.sh [VERSION]
 #
+# VERSION examples:
+#   4.0.0            → public/opencart4/v4.0.0/Opencart4_Nimbbl.ocmod.zip
+#   4.1.0-alpha.1    → public/opencart4/v4.1.0-alpha.1/Opencart4_Nimbbl-alpha.1.ocmod.zip
+#   4.1.0-beta.2     → public/opencart4/v4.1.0-beta.2/Opencart4_Nimbbl-beta.2.ocmod.zip
+#   4.1.0-rc.1       → public/opencart4/v4.1.0-rc.1/Opencart4_Nimbbl-rc.1.ocmod.zip
+#
 # If VERSION is omitted it reads from install.json.
-# Output: dist/nimbbl-opencart4-{VERSION}.zip
 #
 # Requirements: composer, zip, jq (optional — used to parse install.json)
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SRC_DIR="$SCRIPT_DIR/opencart4"
-DIST_DIR="$SCRIPT_DIR/../dist"
 
 # ── Version ──────────────────────────────────────────────────────────────────
 if [[ -n "${1:-}" ]]; then
@@ -20,7 +24,7 @@ if [[ -n "${1:-}" ]]; then
 elif command -v jq &>/dev/null; then
   VERSION="$(jq -r .version "$SRC_DIR/install.json")"
 else
-  VERSION="$(grep -o '"version": *"[^"]*"' "$SRC_DIR/install.json" | head -1 | sed 's/.*"\([0-9][^"]*\)".*/\1/')"
+  VERSION="$(grep -o '"version": *"[^"]*"' "$SRC_DIR/install.json" | head -1 | sed 's/.*"\([^"]*\)".*/\1/')"
 fi
 
 if [[ -z "$VERSION" ]]; then
@@ -28,19 +32,28 @@ if [[ -z "$VERSION" ]]; then
   exit 1
 fi
 
-ZIP_NAME="nimbbl-opencart4-${VERSION}.zip"
-ZIP_PATH="$DIST_DIR/$ZIP_NAME"
+# ── Resolve zip name (stable vs pre-release) ─────────────────────────────────
+# VERSION=4.1.0          → ZIP_NAME=Opencart4_Nimbbl.ocmod.zip
+# VERSION=4.1.0-alpha.1  → ZIP_NAME=Opencart4_Nimbbl-alpha.1.ocmod.zip
+PRERELEASE="${VERSION#*-}"
+if [[ "$PRERELEASE" == "$VERSION" ]]; then
+  # No pre-release suffix
+  ZIP_NAME="Opencart4_Nimbbl.ocmod.zip"
+else
+  ZIP_NAME="Opencart4_Nimbbl-${PRERELEASE}.ocmod.zip"
+fi
+
+PUBLIC_DIR="$SCRIPT_DIR/../public/opencart4/v${VERSION}"
+ZIP_PATH="$PUBLIC_DIR/$ZIP_NAME"
 
 echo "==> Nimbbl OpenCart 4 Plugin — v${VERSION}"
-echo "    src  : $SRC_DIR"
-echo "    dist : $DIST_DIR"
-echo "    zip  : $ZIP_NAME"
+echo "    src    : $SRC_DIR"
+echo "    output : $ZIP_PATH"
 
-mkdir -p "$DIST_DIR"
+mkdir -p "$PUBLIC_DIR"
 
 # ── Composer install (optional) ──────────────────────────────────────────────
 # Runs only if the nimbbl SDK is NOT already bundled in system/library/nimbbl-sdk/.
-# If the SDK is bundled (repo ships it directly), this step is skipped.
 BUNDLED_AUTOLOAD="$SRC_DIR/upload/extension/nimbbl/system/library/nimbbl-sdk/autoload.php"
 if [[ ! -f "$BUNDLED_AUTOLOAD" ]]; then
   echo "==> Installing Composer dependencies..."

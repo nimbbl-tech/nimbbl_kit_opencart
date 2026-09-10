@@ -1,93 +1,140 @@
-# nimbbl_kit_opencart
+# Nimbbl Payment Gateway — OpenCart Plugin
 
+Nimbbl payment gateway plugin for **OpenCart 3** and **OpenCart 4**, enabling seamless checkout via the Nimbbl Sonic SDK.
 
+---
 
-## Getting started
+## Supported Versions
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+| Platform   | Plugin version | Zip name                        |
+|------------|----------------|---------------------------------|
+| OpenCart 2 | v1.x           | `Opencart2_Nimbbl.ocmod.zip`   |
+| OpenCart 3 | v2.x – v3.x    | `Opencart3_Nimbbl.ocmod.zip`   |
+| OpenCart 4 | v4.x           | `Opencart4_Nimbbl.ocmod.zip`   |
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+---
 
-## Add your files
+## Release Zips
 
-- [ ] [Create](https://gitlab.com/-/experiment/new_project_readme_content:7ed2e28da53723c8b68812effc891c29?https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://gitlab.com/-/experiment/new_project_readme_content:7ed2e28da53723c8b68812effc891c29?https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://gitlab.com/-/experiment/new_project_readme_content:7ed2e28da53723c8b68812effc891c29?https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+Pre-built plugin zips are in the `public/` directory, versioned by plugin release:
 
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/nimbbl/nimbbl_kit_opencart.git
-git branch -M main
-git push -uf origin main
+public/
+  opencart2/
+    v1.0.0/  Opencart2_Nimbbl.ocmod.zip
+  opencart3/
+    v2.0.0/  Opencart3_Nimbbl.ocmod.zip
+    v3.0.1/  Opencart3.0.1_Nimbbl.ocmod.zip
+    v3.0.3/  Opencart3.0.3_Nimbbl.ocmod.zip
+    v3.0.4/  Opencart3.0.4_Nimbbl.ocmod.zip
+  opencart4/
+    v4.0.0/  Opencart4_Nimbbl.ocmod.zip
 ```
 
-## Integrate with your tools
+Pre-release zips follow the pattern `Opencart4_Nimbbl-{suffix}.ocmod.zip`:
 
-- [ ] [Set up project integrations](https://gitlab.com/-/experiment/new_project_readme_content:7ed2e28da53723c8b68812effc891c29?https://gitlab.com/nimbbl/nimbbl_kit_opencart/-/settings/integrations)
+```
+v4.1.0-alpha.1/  Opencart4_Nimbbl-alpha.1.ocmod.zip
+v4.1.0-beta.2/   Opencart4_Nimbbl-beta.2.ocmod.zip
+v4.1.0-rc.1/     Opencart4_Nimbbl-rc.1.ocmod.zip
+```
 
-## Collaborate with your team
+---
 
-- [ ] [Invite team members and collaborators](https://gitlab.com/-/experiment/new_project_readme_content:7ed2e28da53723c8b68812effc891c29?https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://gitlab.com/-/experiment/new_project_readme_content:7ed2e28da53723c8b68812effc891c29?https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://gitlab.com/-/experiment/new_project_readme_content:7ed2e28da53723c8b68812effc891c29?https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://gitlab.com/-/experiment/new_project_readme_content:7ed2e28da53723c8b68812effc891c29?https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://gitlab.com/-/experiment/new_project_readme_content:7ed2e28da53723c8b68812effc891c29?https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+## Installation (OpenCart 4)
 
-## Test and Deploy
+1. Download `Opencart4_Nimbbl.ocmod.zip` from [GitHub Releases](../../releases) or `public/opencart4/`.
+2. OpenCart Admin → **Extensions → Installer** → Upload the zip.
+3. **Extensions → Payments → Nimbbl** → click **Install**.
+4. Click **Edit**, enter your **Test/Live API Keys** and **Save**.
+5. The webhook URL is shown in the settings — add it to your Nimbbl dashboard.
 
-Use the built-in continuous integration in GitLab.
+### Requirements
 
-- [ ] [Get started with GitLab CI/CD](https://gitlab.com/-/experiment/new_project_readme_content:7ed2e28da53723c8b68812effc891c29?https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://gitlab.com/-/experiment/new_project_readme_content:7ed2e28da53723c8b68812effc891c29?https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://gitlab.com/-/experiment/new_project_readme_content:7ed2e28da53723c8b68812effc891c29?https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://gitlab.com/-/experiment/new_project_readme_content:7ed2e28da53723c8b68812effc891c29?https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://gitlab.com/-/experiment/new_project_readme_content:7ed2e28da53723c8b68812effc891c29?https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+- OpenCart 4.x
+- PHP 8.1+
+- HTTPS on the store (required by Nimbbl Sonic checkout)
 
-***
+---
 
-# Editing this README
+## Installation (OpenCart 3)
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!).  Thank you to [makeareadme.com](https://www.makeareadme.com) for this template.
+1. Download the appropriate `Opencart3_Nimbbl.ocmod.zip` from `public/opencart3/`.
+2. OpenCart Admin → **Extensions → Installer** → Upload the zip.
+3. **Extensions → Modifications** → click **Refresh**.
+4. **Extensions → Payments → Nimbbl** → Install → Edit → configure API keys.
 
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+---
 
-## Name
-Choose a self-explaining name for your project.
+## Building the OpenCart 4 Zip
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+The OC4 plugin source lives in `src/opencart4/`. Use `src/build.sh` to build the distributable zip:
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+```bash
+# Stable release
+bash src/build.sh 4.0.0
+# → public/opencart4/v4.0.0/Opencart4_Nimbbl.ocmod.zip
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+# Alpha / Beta / RC
+bash src/build.sh 4.1.0-alpha.1
+# → public/opencart4/v4.1.0-alpha.1/Opencart4_Nimbbl-alpha.1.ocmod.zip
+```
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+### Requirements
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+- `bash`, `zip`, `rsync`
+- `composer` (only if `nimbbl-sdk` is not already bundled)
+
+---
+
+## Releasing (OpenCart 4)
+
+Push a version tag to trigger the GitHub Actions release workflow, which builds the zip and creates a GitHub Release automatically:
+
+```bash
+# Stable
+git tag v4.0.0 && git push origin v4.0.0
+
+# Alpha / Beta / RC
+git tag v4.1.0-alpha.1 && git push origin v4.1.0-alpha.1
+git tag v4.1.0-beta.2  && git push origin v4.1.0-beta.2
+git tag v4.1.0-rc.1    && git push origin v4.1.0-rc.1
+```
+
+The workflow (`.github/workflows/release.yml`) will:
+1. Run `src/build.sh {VERSION}` to produce the zip in `public/opencart4/v{VERSION}/`
+2. Create a GitHub Release with the zip attached
+
+---
+
+## Project Structure
+
+```
+src/
+  build.sh                         ← Build script for OC4 zip
+  opencart4/
+    install.json                   ← OC4 Extension Installer metadata
+    upload/
+      extension/nimbbl/
+        catalog/controller/payment/nimbbl.php   ← Checkout flow
+        catalog/model/payment/nimbbl.php
+        catalog/view/template/payment/
+          nimbbl_redirect.twig     ← Nimbbl Sonic SDK integration
+          nimbbl.twig
+        admin/controller/payment/nimbbl.php     ← Admin settings
+        admin/view/template/payment/nimbbl.twig
+        system/library/
+          nimbbl-sdk/              ← Nimbbl PHP SDK
+          vendor/                  ← rmccue/requests (HTTP library)
+
+public/
+  opencart2/                       ← OC2 release zips
+  opencart3/                       ← OC3 release zips
+  opencart4/                       ← OC4 release zips (built by build.sh)
+```
+
+---
 
 ## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
-
+For integration help, contact [support@nimbbl.biz](mailto:support@nimbbl.biz) or visit [nimbbl.biz](https://nimbbl.biz).
